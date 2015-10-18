@@ -5,6 +5,7 @@ SRC_OBJC = $(wildcard src/*.m)
 OBJ = $(SRC_C:.c=.o) $(SRC_OBJC:.m=.o)
 
 Snapp.app/Contents/MacOS/Snapp: $(OBJ)
+	mkdir -p Snapp.app/Contents/MacOS
 	cc -o $@ $^
 
 .PHONY: clean
