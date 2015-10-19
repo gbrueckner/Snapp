@@ -186,7 +186,6 @@
         [animation setRepeatCount:HUGE_VALF];
         [animation setDuration:0.4];
 
-        [layer removeAllAnimations];
         [layer addAnimation:animation forKey:nil];
 
         animation = [CABasicAnimation animationWithKeyPath:@"lineDashPhase"];
@@ -195,7 +194,6 @@
         [animation setRepeatCount:HUGE_VALF];
         [animation setDuration:0.4];
 
-        [yellowLayer removeAllAnimations];
         [yellowLayer addAnimation:animation forKey:nil];
 
         [[self.windowController window] makeKeyAndOrderFront:nil];
