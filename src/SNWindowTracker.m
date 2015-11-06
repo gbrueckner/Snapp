@@ -118,27 +118,38 @@ CGEventRef mouseEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 - (SNHotZone)hotZoneAtLocation:(NSPoint)point {
 
-    NSRect screenFrame = [[NSScreen screenAtLocation:point] frame];
+    NSScreen *screen = [NSScreen screenAtLocation:point];
 
-    if (point.x <= NSMinX(screenFrame) + 1.0) {
-        if (point.y <= NSMinY(screenFrame) + 1.0)
+    NSRect screenFrame = [screen frame];
+    NSRect visibleScreenFrame = [screen visibleFrame];
+
+    CGFloat menubarHeight = NSMaxY(screenFrame) - NSMaxY(visibleScreenFrame);
+
+    // These margins describe the hot zones of the screen.
+    CGFloat marginTop = menubarHeight;
+    CGFloat marginRight = 1.0;
+    CGFloat marginBottom = 1.0;
+    CGFloat marginLeft = 1.0;
+
+    if (point.x <= NSMinX(screenFrame) + marginLeft) {
+        if (point.y <= NSMinY(screenFrame) + marginBottom)
             return kSNHotZoneLowerLeft;
-        else if (point.y >= NSMaxY(screenFrame) - 1.0)
+        else if (point.y >= NSMaxY(screenFrame) - marginTop)
             return kSNHotZoneUpperLeft;
         else
             return kSNHotZoneLeft;
     }
-    else if (point.x >= NSMaxX(screenFrame) - 1.0) {
-        if (point.y <= NSMinY(screenFrame) + 1.0)
+    else if (point.x >= NSMaxX(screenFrame) - marginRight) {
+        if (point.y <= NSMinY(screenFrame) + marginBottom)
             return kSNHotZoneLowerRight;
-        else if (point.y >= NSMaxY(screenFrame) - 1.0)
+        else if (point.y >= NSMaxY(screenFrame) - marginTop)
             return kSNHotZoneUpperRight;
         else
             return kSNHotZoneRight;
     }
-    else if (point.y <= NSMinY(screenFrame) + 1.0)
+    else if (point.y <= NSMinY(screenFrame) + marginBottom)
         return kSNHotZoneDown;
-    else if (point.y >= NSMaxY(screenFrame) - 1.0)
+    else if (point.y >= NSMaxY(screenFrame) - marginTop)
         return kSNHotZoneUp;
 
     return kSNHotZoneNone;
