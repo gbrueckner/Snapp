@@ -119,10 +119,13 @@ CGEventRef mouseEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 - (SNHotZone)hotZoneAtLocation:(NSPoint)point {
 
     NSScreen *screen = [NSScreen screenAtLocation:point];
-
     NSRect screenFrame = [screen frame];
+
+    NSRect visibleScreenFrame = [screen visibleFrame];
+    CGFloat menubarHeight = NSMaxY(screenFrame) - NSMaxY(visibleScreenFrame);
+
     // These margins describe the hot zones of the screen.
-    CGFloat marginTop = 1.0;
+    CGFloat marginTop = menubarHeight;
     CGFloat marginRight = 1.0;
     CGFloat marginBottom = 1.0;
     CGFloat marginLeft = 1.0;
