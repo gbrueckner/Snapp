@@ -27,6 +27,7 @@
 - (instancetype)initWithWindowElement:(AXUIElementRef)window;
 - (void)setFrame:(NSRect)frame;
 - (NSRect)frame;
+- (BOOL)isResizable;
 
 
 @end

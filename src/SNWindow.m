@@ -66,4 +66,16 @@
 }
 
 
+- (BOOL)isResizable {
+
+    Boolean resizable;
+    AXError error = AXUIElementIsAttributeSettable(self.windowElement, kAXSizeAttribute, &resizable);
+
+    if (error == kAXErrorSuccess && resizable)
+        return YES;
+    else
+        return NO;
+}
+
+
 @end
