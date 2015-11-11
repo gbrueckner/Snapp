@@ -97,7 +97,7 @@
 }
 
 
-- (NSRect)frameForHotZone:(SNHotZone)hotZone inScreen:(NSScreen *)screen {
+- (NSRect)resizedFrameForHotZone:(SNHotZone)hotZone ofScreen:(NSScreen *)screen {
 
     CGFloat x, y, w, h;
 
@@ -139,6 +139,54 @@
 }
 
 
+- (NSRect)movedFrame:(NSRect) frame forHotZone:(SNHotZone)hotZone ofScreen:(NSScreen *)screen {
+
+    NSRect visibleFrame = [screen visibleFrame];
+
+    if (   hotZone == kSNHotZoneLowerLeft
+        || hotZone == kSNHotZoneLeft
+        || hotZone == kSNHotZoneUpperLeft) {
+        frame.origin.x = NSMinX(visibleFrame);
+    }
+    if (   hotZone == kSNHotZoneLowerRight
+        || hotZone == kSNHotZoneRight
+        || hotZone == kSNHotZoneUpperRight) {
+        frame.origin.x = NSMaxX(visibleFrame) - frame.size.width;
+    }
+    if (   hotZone == kSNHotZoneLowerLeft
+        || hotZone == kSNHotZoneDown
+        || hotZone == kSNHotZoneLowerRight) {
+        frame.origin.y = NSMinY(visibleFrame);
+    }
+    if (   hotZone == kSNHotZoneUpperLeft
+        || hotZone == kSNHotZoneUpperRight) {
+        frame.origin.y = NSMaxY(visibleFrame) - frame.size.height;
+    }
+    if (   hotZone == kSNHotZoneLeft
+        || hotZone == kSNHotZoneUp
+        || hotZone == kSNHotZoneRight) {
+        frame.origin.y = NSMinY(visibleFrame) + (visibleFrame.size.height - frame.size.height) / 2;
+    }
+    if (   hotZone == kSNHotZoneUp
+        || hotZone == kSNHotZoneDown) {
+        frame.origin.x = NSMinX(visibleFrame) + (visibleFrame.size.width - frame.size.width) / 2;
+    }
+
+    return frame;
+}
+
+
+- (NSRect)frameForWindow:(SNWindow *)window inHotZone:(SNHotZone)hotZone ofScreen:(NSScreen *) screen {
+    if ([window isResizable])
+        return [self resizedFrameForHotZone:hotZone
+                                   ofScreen:screen];
+    else
+        return [self movedFrame:[window frame]
+                     forHotZone:hotZone
+                       ofScreen:screen];
+}
+
+
 - (void)window:(SNWindow *)window didMoveIntoHotZone:(SNHotZone)hotZone ofScreen:(NSScreen *)screen {
 
     if (hotZone == kSNHotZoneNone) {
@@ -158,7 +206,9 @@
     }
     else {
 
-        NSRect frame = [self frameForHotZone:hotZone inScreen:screen];
+        NSRect frame = [self frameForWindow:window
+                                  inHotZone:hotZone
+                                   ofScreen:screen];
 
         CGRect pathRect;
         pathRect.size = frame.size;
@@ -210,12 +260,15 @@
     // If the window has been dragged into fullscreen mode, store the previous
     // size, so that this size can be restored later when dragging the window
     // down.
-    if (hotZone == kSNHotZoneUp)
+    if (hotZone == kSNHotZoneUp && [window isResizable])
         [self.storedWindowSizes setObject:[NSValue valueWithSize:[window frame].size]
                                    forKey:[NSNumber numberWithUnsignedInt:[window windowID]]];
 
     // Snap the window to the appropriate frame.
-    [window setFrame:[self frameForHotZone:hotZone inScreen:screen]];
+    NSRect frame = [self frameForWindow:window
+                              inHotZone:hotZone
+                               ofScreen:screen];
+    [window setFrame:frame];
 
     // Hide the border indicator.
     [self.windowController close];
