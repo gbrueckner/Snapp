@@ -120,13 +120,25 @@ void focusedWindowDidChange(AXObserverRef observer, AXUIElementRef element, CFSt
         return;
     }
 
-    // This crazy busy waiting should be improved!
+    // In the scenario that the user has focused app A and then starts dragging
+    // a window of app B there is a short time span where
+    // AXObserverAddNotification fails. However, it is necessary to call this
+    // function as soon as possible, because otherwise a drag might not be
+    // correctly recognized.
+    // This is the purpose of this loop. To prevent Snapp from getting stuck in
+    // the loop, the magic value of 10000 attempts is used.
+    int attempts = 0;
     do {
         error = AXObserverAddNotification(self.windowObserver,
                                           self.focusedApp,
                                           kAXFocusedWindowChangedNotification,
                                           self);
-    } while (error != kAXErrorSuccess);
+        attempts++;
+    } while (error != kAXErrorSuccess && attempts < 10000);
+    if (error != kAXErrorSuccess) {
+        NSLog(@"AXObserverAddNotification failed (%@).", AXErrorToNSString(error));
+        return;
+    }
 
     CFRunLoopAddSource(CFRunLoopGetCurrent(),
                        AXObserverGetRunLoopSource(self.windowObserver),
