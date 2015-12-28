@@ -20,6 +20,8 @@
 #import "AXUIElement+Additions.h"
 #import "NSScreen+Additions.h"
 #import "SNAppDelegate.h"
+#import "NSAttributedString+Hyperlink.h"
+#import "SNPreferencesViewController.h"
 @import QuartzCore;
 
 
@@ -60,7 +62,7 @@
 
         NSView *view = [[NSView alloc] initWithFrame:NSZeroRect];
 
-        [view setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+        view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
         [window setContentView:view];
         [view release];
 
@@ -246,7 +248,7 @@
 
         [yellowLayer addAnimation:animation forKey:nil];
 
-        [[self.windowController window] makeKeyAndOrderFront:nil];
+        [self.windowController.window makeKeyAndOrderFront:nil];
     }
 }
 
@@ -282,6 +284,41 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 
+    BOOL duplicate = NO;
+
+    for (NSRunningApplication *runningApplication in [[NSWorkspace sharedWorkspace] runningApplications]) {
+        if ([[runningApplication bundleIdentifier] isEqualToString:[[NSRunningApplication currentApplication] bundleIdentifier]]) {
+            if ([runningApplication processIdentifier] != [[NSRunningApplication currentApplication] processIdentifier])
+                duplicate = YES;
+        }
+    }
+
+    if (duplicate) {
+
+        NSWindow *prefsWindow = [[NSWindow alloc] initWithContentRect:NSZeroRect
+                                                            styleMask:(NSTitledWindowMask | NSClosableWindowMask)
+                                                              backing:NSBackingStoreBuffered
+                                                                defer:NO];
+        prefsWindow.title = @"Snapp";
+
+        NSWindowController *prefsWindowController = [[NSWindowController alloc] initWithWindow:prefsWindow];
+
+        NSViewController *prefsViewController = [[SNPreferencesViewController alloc] initWithNibName:nil
+                                                                                              bundle:nil];
+
+        prefsWindowController.contentViewController = prefsViewController;
+
+        [prefsWindowController.window setFrame:NSMakeRect(0.0, 0.0, 298.0, 310.0)
+                                       display:YES];
+        [prefsWindowController.window center];
+        [prefsWindowController.window makeKeyAndOrderFront:self];
+
+        [prefsWindow release];
+        [prefsViewController release];
+
+        return;
+    }
+
     NSAlert *alert = [[NSAlert alloc] init];
 
     [alert setAlertStyle:NSInformationalAlertStyle];
@@ -306,6 +343,7 @@
 
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
+    [NSUserDefaults.standardUserDefaults synchronize];
     [self.windowTracker setDelegate:nil];
 }
 
