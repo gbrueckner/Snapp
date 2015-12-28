@@ -32,9 +32,8 @@
 
     // Create the icon view.
     NSImageView *iconView = [[NSImageView alloc] initWithFrame:NSZeroRect];
-    NSImage *iconImage = [NSApp applicationIconImage];
-    iconImage.size = NSMakeSize(128, 128);
-    iconView.image = iconImage;
+    iconView.image = [NSApp applicationIconImage];
+    iconView.image.size = NSMakeSize(128, 128);
     iconView.imageScaling = NSImageScaleAxesIndependently;
     [self.view addSubview:iconView];
     [iconView release];
@@ -141,8 +140,8 @@
 
     if (SMLoginItemSetEnabled(CFSTR("SnappHelper"),
                                loginCheckbox.state == NSOnState ? TRUE : FALSE)) {
-        [[NSUserDefaults standardUserDefaults] setBool:(loginCheckbox.state == NSOnState)
-                                              forKey:@"openAtLogin"];
+         [[NSUserDefaults standardUserDefaults] setBool:(loginCheckbox.state == NSOnState)
+                                                 forKey:@"openAtLogin"];
     }
     else
         [loginCheckbox setNextState];
@@ -159,12 +158,6 @@
     }
 
     // Then, terminate *this* Snapp instance.
-    [NSApp terminate:self];
-}
-
-
-- (void)viewDidDisappear {
-    [super viewDidDisappear];
     [NSApp terminate:self];
 }
 

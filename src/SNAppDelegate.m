@@ -17,10 +17,10 @@
  */
 
 
-#import "AXUIElement+Additions.h"
-#import "NSScreen+Additions.h"
 #import "SNAppDelegate.h"
+#import "AXUIElement+Additions.h"
 #import "NSAttributedString+Hyperlink.h"
+#import "NSScreen+Additions.h"
 #import "SNPreferencesViewController.h"
 @import QuartzCore;
 
@@ -55,38 +55,32 @@
                                                        styleMask:NSBorderlessWindowMask
                                                          backing:NSBackingStoreBuffered
                                                            defer:YES];
-        [window setBackgroundColor:[NSColor clearColor]];
-        [window setIgnoresMouseEvents:YES];
-        [window setLevel:NSFloatingWindowLevel];
-        [window setOpaque:NO];
-        [window setHidesOnDeactivate:NO];
-
-        NSView *view = [[NSView alloc] initWithFrame:NSZeroRect];
-
-        view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
-        [window setContentView:view];
-        [view release];
+        window.backgroundColor = [NSColor clearColor];
+        window.ignoresMouseEvents = YES;
+        window.level = NSFloatingWindowLevel;
+        window.opaque = NO;
+        window.hidesOnDeactivate = NO;
 
         _windowController = [[NSWindowController alloc] initWithWindow:window];
 
         [window release];
 
         CAShapeLayer *layer = [CAShapeLayer layer];
-        [layer setFillColor:[[NSColor colorWithWhite:0.5 alpha:0.15] CGColor]];
-        [layer setStrokeColor:[[NSColor blackColor] CGColor]];
-        [layer setLineWidth:6.0];
-        [layer setLineDashPattern:@[@15.0f, @5.0f]];
+        layer.fillColor = [NSColor colorWithWhite:0.5 alpha:0.15].CGColor;
+        layer.lineDashPattern = @[@15, @5];
+        layer.lineWidth = 6;
+        layer.strokeColor = [NSColor blackColor].CGColor;
 
         CAShapeLayer *yellowLayer = [CAShapeLayer layer];
-        [yellowLayer setFillColor:nil];
-        [yellowLayer setStrokeColor:[[NSColor yellowColor] CGColor]];
-        [yellowLayer setLineWidth:3.0];
-        [yellowLayer setLineDashPattern:@[@12.0f, @8.0f]];
+        yellowLayer.fillColor = nil;
+        yellowLayer.lineDashPattern = @[@12, @8];
+        yellowLayer.lineWidth = 3;
+        yellowLayer.strokeColor = [NSColor yellowColor].CGColor;
 
         [layer addSublayer:yellowLayer];
 
-        [view setLayer:layer];
-        [view setWantsLayer:YES];
+        [window.contentView setLayer:layer];
+        [window.contentView setWantsLayer:YES];
 
         // Create the preferences window controller.
         NSWindow *prefsWindow = [[NSWindow alloc] initWithContentRect:NSZeroRect
@@ -102,7 +96,7 @@
 
         _prefsWindowController.contentViewController = prefsViewController;
 
-        [_prefsWindowController.window setFrame:NSMakeRect(0.0, 0.0, 298.0, 310.0)
+        [_prefsWindowController.window setFrame:NSMakeRect(0, 0, 298, 310)
                                         display:YES];
 
         [prefsWindow release];
@@ -128,25 +122,25 @@
 
     switch(hotZone) {
         case kSNHotZoneDown:
-            x = 0.0; y = 0.0; w = 1.0; h = 0.5;
+            x = 0;   y = 0;   w = 1;   h = 0.5;
             break;
         case kSNHotZoneLeft:
-            x = 0.0; y = 0.0; w = 0.5; h = 1.0;
+            x = 0;   y = 0;   w = 0.5; h = 1;
             break;
         case kSNHotZoneLowerLeft:
-            x = 0.0; y = 0.0; w = 0.5; h = 0.5;
+            x = 0;   y = 0;   w = 0.5; h = 0.5;
             break;
         case kSNHotZoneLowerRight:
-            x = 0.5; y = 0.0; w = 0.5; h = 0.5;
+            x = 0.5; y = 0;   w = 0.5; h = 0.5;
             break;
         case kSNHotZoneRight:
-            x = 0.5; y = 0.0; w = 0.5; h = 1.0;
+            x = 0.5; y = 0;   w = 0.5; h = 1;
             break;
         case kSNHotZoneUp:
-            x = 0.0; y = 0.0; w = 1.0; h = 1.0;
+            x = 0;   y = 0;   w = 1;   h = 1;
             break;
         case kSNHotZoneUpperLeft:
-            x = 0.0; y = 0.5; w = 0.5; h = 0.5;
+            x = 0;   y = 0.5; w = 0.5; h = 0.5;
             break;
         case kSNHotZoneUpperRight:
             x = 0.5; y = 0.5; w = 0.5; h = 0.5;
@@ -155,18 +149,18 @@
             return NSMakeRect(NAN, NAN, NAN, NAN);
     }
 
-    NSRect visibleFrame = [screen visibleFrame];
+    NSRect visibleFrame = screen.visibleFrame;
 
-    return NSMakeRect(visibleFrame.origin.x + x * visibleFrame.size.width,
-                      visibleFrame.origin.y + y * visibleFrame.size.height,
-                      w * visibleFrame.size.width,
-                      h * visibleFrame.size.height);
+    return NSMakeRect(NSMinX(visibleFrame) + x * NSWidth(visibleFrame),
+                      NSMinY(visibleFrame) + y * NSHeight(visibleFrame),
+                      w * NSWidth(visibleFrame),
+                      h * NSHeight(visibleFrame));
 }
 
 
 - (NSRect)movedFrame:(NSRect) frame forHotZone:(SNHotZone)hotZone ofScreen:(NSScreen *)screen {
 
-    NSRect visibleFrame = [screen visibleFrame];
+    NSRect visibleFrame = screen.visibleFrame;
 
     if (   hotZone == kSNHotZoneLowerLeft
         || hotZone == kSNHotZoneLeft
@@ -176,7 +170,7 @@
     if (   hotZone == kSNHotZoneLowerRight
         || hotZone == kSNHotZoneRight
         || hotZone == kSNHotZoneUpperRight) {
-        frame.origin.x = NSMaxX(visibleFrame) - frame.size.width;
+        frame.origin.x = NSMaxX(visibleFrame) - NSWidth(frame);
     }
     if (   hotZone == kSNHotZoneLowerLeft
         || hotZone == kSNHotZoneDown
@@ -185,16 +179,16 @@
     }
     if (   hotZone == kSNHotZoneUpperLeft
         || hotZone == kSNHotZoneUpperRight) {
-        frame.origin.y = NSMaxY(visibleFrame) - frame.size.height;
+        frame.origin.y = NSMaxY(visibleFrame) - NSHeight(frame);
     }
     if (   hotZone == kSNHotZoneLeft
         || hotZone == kSNHotZoneUp
         || hotZone == kSNHotZoneRight) {
-        frame.origin.y = NSMinY(visibleFrame) + (visibleFrame.size.height - frame.size.height) / 2;
+        frame.origin.y = NSMinY(visibleFrame) + (NSHeight(visibleFrame) - NSHeight(frame)) / 2;
     }
     if (   hotZone == kSNHotZoneUp
         || hotZone == kSNHotZoneDown) {
-        frame.origin.x = NSMinX(visibleFrame) + (visibleFrame.size.width - frame.size.width) / 2;
+        frame.origin.x = NSMinX(visibleFrame) + (NSWidth(visibleFrame) - NSWidth(frame)) / 2;
     }
 
     return frame;
@@ -202,11 +196,11 @@
 
 
 - (NSRect)frameForWindow:(SNWindow *)window inHotZone:(SNHotZone)hotZone ofScreen:(NSScreen *) screen {
-    if ([window isResizable])
+    if (window.isResizable)
         return [self resizedFrameForHotZone:hotZone
                                    ofScreen:screen];
     else
-        return [self movedFrame:[window frame]
+        return [self movedFrame:window.frame
                      forHotZone:hotZone
                        ofScreen:screen];
 }
@@ -218,10 +212,10 @@
 
         [self.windowController close];
 
-        NSValue *sizeValue = [self.storedWindowSizes objectForKey:[NSNumber numberWithUnsignedInt:[window windowID]]];
+        NSValue *sizeValue = [self.storedWindowSizes objectForKey:[NSNumber numberWithUnsignedInt:window.windowID]];
         if (sizeValue != nil) {
-            NSSize size = [sizeValue sizeValue];
-            [self.storedWindowSizes removeObjectForKey:[NSNumber numberWithUnsignedInt:[window windowID]]];
+            NSSize size = sizeValue.sizeValue;
+            [self.storedWindowSizes removeObjectForKey:[NSNumber numberWithUnsignedInt:window.windowID]];
 
             [window setFrame:NSMakeRect([NSEvent mouseLocation].x - size.width / 2,
                                         NSMaxY([screen frame]) - size.height,
@@ -239,35 +233,35 @@
         pathRect.size = frame.size;
         pathRect.origin = CGPointZero;
 
-        CGPathRef path = CGPathCreateWithRoundedRect(CGRectInset(pathRect, 4.0, 4.0),
-                15.0,
-                15.0,
-                NULL);
+        CGPathRef path = CGPathCreateWithRoundedRect(CGRectInset(pathRect, 4, 4),
+                                                     15,
+                                                     15,
+                                                     NULL);
 
-        CAShapeLayer *layer = (CAShapeLayer *) [[[self.windowController window] contentView] layer];
-        CAShapeLayer *yellowLayer = (CAShapeLayer *) [[layer sublayers] objectAtIndex:0];
+        CAShapeLayer *layer = (CAShapeLayer *) self.windowController.window.contentView.layer;
+        CAShapeLayer *yellowLayer = (CAShapeLayer *) [layer.sublayers objectAtIndex:0];
 
-        [layer setPath:path];
-        [yellowLayer setPath:path];
+        layer.path = path;
+        yellowLayer.path = path;
 
         CGPathRelease(path);
 
         [[self.windowController window] setFrame:frame
-                                    display:YES];
+                                         display:YES];
 
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"lineDashPhase"];
-        [animation setFromValue:[NSNumber numberWithDouble:0.0]];
-        [animation setToValue:[NSNumber numberWithDouble:20.0]];
-        [animation setRepeatCount:HUGE_VALF];
-        [animation setDuration:0.4];
+        animation.fromValue = @0;
+        animation.toValue = @20;
+        animation.repeatCount = HUGE_VALF;
+        animation.duration = 0.4;
 
         [layer addAnimation:animation forKey:nil];
 
         animation = [CABasicAnimation animationWithKeyPath:@"lineDashPhase"];
-        [animation setFromValue:[NSNumber numberWithDouble:18.5]];
-        [animation setToValue:[NSNumber numberWithDouble:38.5]];
-        [animation setRepeatCount:HUGE_VALF];
-        [animation setDuration:0.4];
+        animation.fromValue = @18.5;
+        animation.toValue = @38.5;
+        animation.repeatCount = HUGE_VALF;
+        animation.duration = 0.4;
 
         [yellowLayer addAnimation:animation forKey:nil];
 
@@ -286,14 +280,14 @@
     // size, so that this size can be restored later when dragging the window
     // down.
     if (hotZone == kSNHotZoneUp && [window isResizable])
-        [self.storedWindowSizes setObject:[NSValue valueWithSize:[window frame].size]
-                                   forKey:[NSNumber numberWithUnsignedInt:[window windowID]]];
+        [self.storedWindowSizes setObject:[NSValue valueWithSize:window.frame.size]
+                                   forKey:[NSNumber numberWithUnsignedInt:window.windowID]];
 
     // Snap the window to the appropriate frame.
     NSRect frame = [self frameForWindow:window
                               inHotZone:hotZone
                                ofScreen:screen];
-    [window setFrame:frame];
+    window.frame = frame;
 
     // Hide the border indicator.
     [self.windowController close];
@@ -301,7 +295,7 @@
 
 
 - (void)window:(SNWindow *)window isBeingResizedOnScreen:(NSScreen *)screen {
-    [self.storedWindowSizes removeObjectForKey:[NSNumber numberWithUnsignedInt:[window windowID]]];
+    [self.storedWindowSizes removeObjectForKey:[NSNumber numberWithUnsignedInt:window.windowID]];
 }
 
 
@@ -309,9 +303,9 @@
 
     NSAlert *alert = [[NSAlert alloc] init];
 
-    [alert setAlertStyle:NSInformationalAlertStyle];
-    [alert setMessageText:@"Enable Accessibility Features"];
-    [alert setInformativeText:@"Snapp requires accessibility features. Please go to System Preferences > Security & Privacy > Accessibility to enable these features, then click OK."];
+    alert.alertStyle = NSInformationalAlertStyle;
+    alert.messageText = @"Enable Accessibility Features";
+    alert.informativeText = @"Snapp requires accessibility features. Please go to System Preferences > Security & Privacy > Accessibility to enable these features, then click OK.";
 
     // Using AXIsProcessTrustedWithOptions really has no benefit.
     while (!AXIsProcessTrusted())
@@ -319,11 +313,11 @@
 
     [alert release];
 
-    [self.windowTracker setDelegate:self];
+    self.windowTracker.delegate = self;
 
-    [[[NSWorkspace sharedWorkspace] notificationCenter] postNotificationName:NSWorkspaceDidActivateApplicationNotification
-                                                                      object:self
-                                                                    userInfo:@{NSWorkspaceApplicationKey: [[NSWorkspace sharedWorkspace] frontmostApplication]}];
+    [[NSWorkspace sharedWorkspace].notificationCenter postNotificationName:NSWorkspaceDidActivateApplicationNotification
+                                                                    object:self
+                                                                  userInfo:@{NSWorkspaceApplicationKey: [NSWorkspace sharedWorkspace].frontmostApplication}];
 
     // Unhide the app. Otherwise, the indicator window might not be shown.
     [NSApp unhide];
@@ -344,8 +338,8 @@
 
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-    [NSUserDefaults.standardUserDefaults synchronize];
-    [self.windowTracker setDelegate:nil];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    self.windowTracker.delegate = nil;
 }
 
 

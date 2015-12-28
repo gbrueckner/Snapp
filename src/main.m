@@ -25,7 +25,7 @@ int main(int argc, const char *argv[]) {
 
     @autoreleasepool {
         SNAppDelegate *appDelegate = [[SNAppDelegate alloc] init];
-        [[NSApplication sharedApplication] setDelegate:appDelegate];
+        [NSApplication sharedApplication].delegate = appDelegate;
         [[NSApplication sharedApplication] run];
         [appDelegate release];
     }

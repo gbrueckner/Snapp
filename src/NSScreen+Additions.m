@@ -26,7 +26,7 @@
 + (NSScreen *)screenAtLocation:(CGPoint)location {
 
     for (NSScreen *screen in [NSScreen screens]) {
-        if (NSMouseInRect(location, [screen frame], NO))
+        if (NSMouseInRect(location, screen.frame, NO))
             return screen;
     }
 
@@ -37,26 +37,26 @@
 + (NSScreen *)screenAtZeroLocation {
     // NSZeroPoint doesn't work here because NSMouseInRect doesn't count the
     // lower screen border as belonging to the screen.
-    return [NSScreen screenAtLocation:NSMakePoint(0.0, DBL_MIN)];
+    return [NSScreen screenAtLocation:NSMakePoint(0, DBL_MIN)];
 }
 
 
 - (NSNumber *)screenNumber {
-    return [[self deviceDescription] objectForKey:@"NSScreenNumber"];
+    return [self.deviceDescription objectForKey:@"NSScreenNumber"];
 }
 
 
 + (NSPoint)flipPoint:(NSPoint)point {
-    NSRect frame = [[NSScreen screenAtZeroLocation] frame];
-    return NSMakePoint(point.x, frame.size.height - point.y);
+    NSRect frame = [NSScreen screenAtZeroLocation].frame;
+    return NSMakePoint(point.x, NSHeight(frame) - point.y);
 }
 
 
 + (NSRect)flipRect:(NSRect)rect {
-    return NSMakeRect(rect.origin.x,
+    return NSMakeRect(NSMinX(rect),
                       [NSScreen flipPoint:NSMakePoint(NSMinX(rect), NSMaxY(rect))].y,
-                      rect.size.width,
-                      rect.size.height);
+                      NSWidth(rect),
+                      NSHeight(rect));
 }
 
 

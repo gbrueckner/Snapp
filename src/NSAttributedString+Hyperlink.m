@@ -14,12 +14,12 @@
 + (instancetype)hyperlinkFromString:(NSString*)inString withURL:(NSURL*)aURL {
 
     NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithString:inString];
-    NSRange range = NSMakeRange(0, [attrString length]);
+    NSRange range = NSMakeRange(0, attrString.length);
 
     [attrString beginEditing];
 
     [attrString addAttribute:NSLinkAttributeName
-                       value:[aURL absoluteString]
+                       value:aURL.absoluteString
                        range:range];
 
     // make the text appear in blue

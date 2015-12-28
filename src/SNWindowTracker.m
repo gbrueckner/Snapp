@@ -119,16 +119,16 @@ CGEventRef mouseEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 - (SNHotZone)hotZoneAtLocation:(NSPoint)point {
 
     NSScreen *screen = [NSScreen screenAtLocation:point];
-    NSRect screenFrame = [screen frame];
+    NSRect screenFrame = screen.frame;
 
-    NSRect visibleScreenFrame = [screen visibleFrame];
+    NSRect visibleScreenFrame = screen.visibleFrame;
     CGFloat menubarHeight = NSMaxY(screenFrame) - NSMaxY(visibleScreenFrame);
 
     // These margins describe the hot zones of the screen.
     CGFloat marginTop = menubarHeight;
-    CGFloat marginRight = 1.0;
-    CGFloat marginBottom = 1.0;
-    CGFloat marginLeft = 1.0;
+    CGFloat marginRight = 1;
+    CGFloat marginBottom = 1;
+    CGFloat marginLeft = 1;
 
     if (point.x <= NSMinX(screenFrame) + marginLeft) {
         if (point.y <= NSMinY(screenFrame) + marginBottom)
@@ -188,7 +188,7 @@ CGEventRef mouseEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRe
         // update quickly enough (when dragging, the result is only updated
         // once the user doesn't move the mouse for a moment). So, use
         // CGWindowGetBounds instead.
-        NSRect currentFrame = [self.focusedWindow frame];
+        NSRect currentFrame = self.focusedWindow.frame;
         if (!NSEqualSizes(self.initialFrame.size, currentFrame.size)) {
             [self.delegate window:self.focusedWindow isBeingResizedOnScreen:[NSScreen screenAtLocation:point]];
             self.state = kSNWindowTrackerStateWindowIsResizing;
@@ -211,8 +211,8 @@ CGEventRef mouseEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 
 - (void)focusedWindowDidChange:(SNWindow *)window {
-    [self setFocusedWindow:window];
-    self.initialFrame = [self.focusedWindow frame];
+    self.focusedWindow = window;
+    self.initialFrame = self.focusedWindow.frame;
 }
 
 

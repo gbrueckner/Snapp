@@ -24,12 +24,8 @@ int main(int argc, const char *argv[]) {
 
     @autoreleasepool {
         NSArray *snappInstances = [NSRunningApplication runningApplicationsWithBundleIdentifier:@"Snapp"];
-        if ([snappInstances count] == 0) {
-            NSLog(@"Launching Snapp...");
+        if ([snappInstances count] == 0)
             [[NSWorkspace sharedWorkspace] launchApplication:@"/Applications/Snapp.app"];
-        }
-        else
-            NSLog(@"Snapp is already running...");
     }
 
     return EXIT_SUCCESS;

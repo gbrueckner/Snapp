@@ -53,7 +53,7 @@ void focusedWindowDidChange(AXObserverRef observer, AXUIElementRef element, CFSt
 
     if ((self = [super init])) {
 
-        [self setDelegate:delegate];
+        self.delegate = delegate;
 
         [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self
                                                                selector:@selector(didActivateApplication:)
@@ -83,7 +83,7 @@ void focusedWindowDidChange(AXObserverRef observer, AXUIElementRef element, CFSt
         CFRelease(_windowObserver);
     }
 
-    [self setDelegate:nil];
+    self.delegate = nil;
     [super dealloc];
 }
 
@@ -106,7 +106,7 @@ void focusedWindowDidChange(AXObserverRef observer, AXUIElementRef element, CFSt
         CFRelease(self.focusedApp);
     }
 
-    pid_t pid = [[[notification userInfo] objectForKey:NSWorkspaceApplicationKey] processIdentifier];
+    pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
     if (pid == -1) {
         NSLog(@"Could not determine the PID for this application.");
         return;
