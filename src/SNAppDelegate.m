@@ -33,6 +33,7 @@
 @property(readonly) NSMutableDictionary *storedWindowSizes;
 @property(readonly) NSWindowController *windowController;
 @property(readonly) SNWindowTracker *windowTracker;
+@property(readonly) NSWindowController *prefsWindowController;
 
 @end
 
@@ -86,6 +87,26 @@
 
         [view setLayer:layer];
         [view setWantsLayer:YES];
+
+        // Create the preferences window controller.
+        NSWindow *prefsWindow = [[NSWindow alloc] initWithContentRect:NSZeroRect
+                                                            styleMask:(NSTitledWindowMask | NSClosableWindowMask)
+                                                              backing:NSBackingStoreBuffered
+                                                                defer:NO];
+        prefsWindow.title = @"Snapp";
+
+        _prefsWindowController = [[NSWindowController alloc] initWithWindow:prefsWindow];
+
+        NSViewController *prefsViewController = [[SNPreferencesViewController alloc] initWithNibName:nil
+                                                                                              bundle:nil];
+
+        _prefsWindowController.contentViewController = prefsViewController;
+
+        [_prefsWindowController.window setFrame:NSMakeRect(0.0, 0.0, 298.0, 310.0)
+                                        display:YES];
+
+        [prefsWindow release];
+        [prefsViewController release];
     }
 
     return self;
@@ -94,7 +115,9 @@
 
 - (void)dealloc {
     [_windowTracker release];
+    [_prefsWindowController release];
     [_storedWindowSizes release];
+    [_windowController release];
     [super dealloc];
 }
 
@@ -284,41 +307,6 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 
-    BOOL duplicate = NO;
-
-    for (NSRunningApplication *runningApplication in [[NSWorkspace sharedWorkspace] runningApplications]) {
-        if ([[runningApplication bundleIdentifier] isEqualToString:[[NSRunningApplication currentApplication] bundleIdentifier]]) {
-            if ([runningApplication processIdentifier] != [[NSRunningApplication currentApplication] processIdentifier])
-                duplicate = YES;
-        }
-    }
-
-    if (duplicate) {
-
-        NSWindow *prefsWindow = [[NSWindow alloc] initWithContentRect:NSZeroRect
-                                                            styleMask:(NSTitledWindowMask | NSClosableWindowMask)
-                                                              backing:NSBackingStoreBuffered
-                                                                defer:NO];
-        prefsWindow.title = @"Snapp";
-
-        NSWindowController *prefsWindowController = [[NSWindowController alloc] initWithWindow:prefsWindow];
-
-        NSViewController *prefsViewController = [[SNPreferencesViewController alloc] initWithNibName:nil
-                                                                                              bundle:nil];
-
-        prefsWindowController.contentViewController = prefsViewController;
-
-        [prefsWindowController.window setFrame:NSMakeRect(0.0, 0.0, 298.0, 310.0)
-                                       display:YES];
-        [prefsWindowController.window center];
-        [prefsWindowController.window makeKeyAndOrderFront:self];
-
-        [prefsWindow release];
-        [prefsViewController release];
-
-        return;
-    }
-
     NSAlert *alert = [[NSAlert alloc] init];
 
     [alert setAlertStyle:NSInformationalAlertStyle];
@@ -339,6 +327,19 @@
 
     // Unhide the app. Otherwise, the indicator window might not be shown.
     [NSApp unhide];
+}
+
+
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
+
+    // Don't show the preferences window twice.
+    if (flag)
+        return NO;
+
+    [self.prefsWindowController.window center];
+    [self.prefsWindowController.window makeKeyAndOrderFront:self];
+
+    return NO;
 }
 
 
