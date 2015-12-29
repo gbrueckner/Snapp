@@ -40,7 +40,7 @@
 
     // Create the info label.
     NSTextField *infoLabel = [[NSTextField alloc] initWithFrame:NSZeroRect];
-    infoLabel.stringValue = @"Launch Snapp twice to show this window.";
+    infoLabel.stringValue = @"Open Snapp twice to show this window.";
     infoLabel.alignment = NSCenterTextAlignment;
     infoLabel.bezeled = NO;
     infoLabel.drawsBackground = NO;
@@ -64,8 +64,8 @@
     NSButton *quitButton = [[NSButton alloc] initWithFrame:NSZeroRect];
     quitButton.title = @"Quit Snapp";
     quitButton.bezelStyle = NSRoundedBezelStyle;
-    quitButton.target = self;
-    quitButton.action = @selector(quitButtonClicked:);
+    quitButton.target = NSApp;
+    quitButton.action = @selector(terminate:);
     [self.view addSubview:quitButton];
     [quitButton release];
 
@@ -145,20 +145,6 @@
     }
     else
         [loginCheckbox setNextState];
-}
-
-
-- (void)quitButtonClicked:(id)sender {
-
-    // First, terminate all *other* Snapp instances.
-    NSArray *snappInstances = [NSRunningApplication runningApplicationsWithBundleIdentifier:[NSRunningApplication currentApplication].bundleIdentifier];
-    for (NSRunningApplication *snappInstance in snappInstances) {
-        if (snappInstance.processIdentifier != [NSRunningApplication currentApplication].processIdentifier)
-            [snappInstance terminate];
-    }
-
-    // Then, terminate *this* Snapp instance.
-    [NSApp terminate:self];
 }
 
 
