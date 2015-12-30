@@ -60,6 +60,16 @@
     [self.view addSubview:loginCheckbox];
     [loginCheckbox release];
 
+    // Create the sound checkbox.
+    NSButton *playSoundCheckbox = [[NSButton alloc] initWithFrame:NSZeroRect];
+    playSoundCheckbox.title = @"Play a sound when snapping windows";
+    playSoundCheckbox.buttonType = NSSwitchButton;
+    playSoundCheckbox.state = [[NSUserDefaults standardUserDefaults] boolForKey:@"playSnapSound"] ? NSOnState : NSOffState;
+    playSoundCheckbox.target = self;
+    playSoundCheckbox.action = @selector(playSoundCheckboxClicked:);
+    [self.view addSubview:playSoundCheckbox];
+    [playSoundCheckbox release];
+
     // Create the quit button.
     NSButton *quitButton = [[NSButton alloc] initWithFrame:NSZeroRect];
     quitButton.title = @"Quit Snapp";
@@ -91,6 +101,7 @@
     NSDictionary *views = @{@"iconView": iconView,
                            @"infoLabel": infoLabel,
                        @"loginCheckbox": loginCheckbox,
+                   @"playSoundCheckbox": playSoundCheckbox,
                           @"quitButton": quitButton,
                             @"ossLabel": ossLabel};
 
@@ -99,40 +110,55 @@
     }];
 
     [self.view addConstraints:
-            [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-5-[iconView]-[infoLabel]-20-[loginCheckbox]-[quitButton]-[ossLabel]-|"
-                                                    options:NSLayoutFormatAlignAllCenterX
-                                                    metrics:nil
-                                                      views:views]];
+        [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-5-[iconView]-[infoLabel]-20-[loginCheckbox]-[playSoundCheckbox]-[quitButton]-[ossLabel]-|"
+                                                options:NSLayoutFormatAlignAllCenterX
+                                                metrics:nil
+                                                  views:views]];
 
     [self.view addConstraints:
-            [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[infoLabel]-|"
-                                                    options:0
-                                                    metrics:nil
-                                                      views:views]];
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[infoLabel]-|"
+                                                options:0
+                                                metrics:nil
+                                                  views:views]];
 
     [self.view addConstraints:
-            [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[ossLabel]-|"
-                                                    options:0
-                                                    metrics:nil
-                                                      views:views]];
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[ossLabel]-|"
+                                                options:0
+                                                metrics:nil
+                                                  views:views]];
 
     [self.view addConstraints:
-            [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=20-[loginCheckbox]->=20-|"
-                                                    options:0
-                                                    metrics:nil
-                                                      views:views]];
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=20-[loginCheckbox]->=20-|"
+                                                options:0
+                                                metrics:nil
+                                                  views:views]];
 
     [self.view addConstraints:
-            [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=20-[quitButton]->=20-|"
-                                                    options:0
-                                                    metrics:nil
-                                                      views:views]];
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=20-[playSoundCheckbox]->=20-|"
+                                                options:0
+                                                metrics:nil
+                                                  views:views]];
 
     [self.view addConstraints:
-            [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=10-[iconView]->=10-|"
-                                                    options:0
-                                                    metrics:nil
-                                                      views:views]];
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=20-[quitButton]->=20-|"
+                                                options:0
+                                                metrics:nil
+                                                  views:views]];
+
+    [self.view addConstraints:
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=10-[iconView]->=10-|"
+                                                options:0
+                                                metrics:nil
+                                                  views:views]];
+
+    [self.view addConstraint:
+        [NSLayoutConstraint constraintWithItem:loginCheckbox
+                                     attribute:NSLayoutAttributeLeft
+                                     relatedBy:NSLayoutRelationEqual
+                                        toItem:playSoundCheckbox
+                                     attribute:NSLayoutAttributeLeft
+                                    multiplier:1
+                                      constant:0]];
 }
 
 
@@ -145,6 +171,12 @@
     }
     else
         [loginCheckbox setNextState];
+}
+
+
+- (void)playSoundCheckboxClicked:(NSButton *)playSoundCheckbox {
+     [[NSUserDefaults standardUserDefaults] setBool:(playSoundCheckbox.state == NSOnState)
+                                             forKey:@"playSnapSound"];
 }
 
 

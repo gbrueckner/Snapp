@@ -24,3 +24,4 @@ install:
 uninstall:
 	osascript -e 'quit app "Snapp"'
 	rm -rf /Applications/Snapp.app/
+	rm -rf ~/Library/Preferences/Snapp.plist

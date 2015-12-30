@@ -96,7 +96,7 @@
 
         _prefsWindowController.contentViewController = prefsViewController;
 
-        [_prefsWindowController.window setFrame:NSMakeRect(0, 0, 298, 310)
+        [_prefsWindowController.window setFrame:NSMakeRect(0, 0, 298, 326)
                                         display:YES];
 
         [prefsWindow release];
@@ -289,6 +289,10 @@
                                ofScreen:screen];
     window.frame = frame;
 
+    // Play a 'pop' sound if desired.
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"playSnapSound"])
+        [[NSSound soundNamed:@"Pop"] play];
+
     // Hide the border indicator.
     [self.windowController close];
 }
@@ -300,6 +304,9 @@
 
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+
+    // Set default user defaults.
+    [[NSUserDefaults standardUserDefaults] registerDefaults:@{@"openAtLogin": @NO, @"playSnapSound": @YES}];
 
     NSAlert *alert = [[NSAlert alloc] init];
 
