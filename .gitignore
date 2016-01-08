@@ -1,3 +1,4 @@
-*.o
+.DS_Store
+src/*.o
 Snapp.app/Contents/MacOS/Snapp
 Snapp.app/Contents/Library/LoginItems/SnappHelper.app/Contents/MacOS/SnappHelper

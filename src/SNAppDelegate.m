@@ -79,6 +79,7 @@
 
         [layer addSublayer:yellowLayer];
 
+        // Don't use dot syntax here, see #4.
         [window.contentView setLayer:layer];
         [window.contentView setWantsLayer:YES];
 
@@ -238,6 +239,7 @@
                                                      15,
                                                      NULL);
 
+        // Don't use dot syntax here, see #4.
         CAShapeLayer *layer = (CAShapeLayer *) [self.windowController.window.contentView layer];
         CAShapeLayer *yellowLayer = (CAShapeLayer *) [layer.sublayers objectAtIndex:0];
 

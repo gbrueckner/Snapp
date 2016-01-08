@@ -10,10 +10,16 @@ Drag a window up to the menubar to maximize it, or drag a window to the side to 
 
 ![Snapp in action](https://i.imgur.com/STFK4q3.gif)
 
+### Compatibility
+
+Snapp is developed on OS X El Capitan.
+It has been [reported](https://github.com/gbrueckner/Snapp/pull/5) to run on OS X Yosemite as well.
+
 ## Installation
 
 Upon cloning the Snapp repository, run `make` to compile it.
-To install it and to start it at login, run `make install`.
+To install it, run `make install`.
+To open Snapp at login, click the checkbox in Snapp's preferences window.
 To uninstall, run `make uninstall`.
 
 ## License
