@@ -79,8 +79,8 @@
 
         [layer addSublayer:yellowLayer];
 
-        window.contentView.layer = layer;
-        window.contentView.wantsLayer = YES;
+        [window.contentView setLayer:layer];
+        [window.contentView setWantsLayer:YES];
 
         // Create the preferences window controller.
         NSWindow *prefsWindow = [[NSWindow alloc] initWithContentRect:NSZeroRect
@@ -238,7 +238,7 @@
                                                      15,
                                                      NULL);
 
-        CAShapeLayer *layer = (CAShapeLayer *) self.windowController.window.contentView.layer;
+        CAShapeLayer *layer = (CAShapeLayer *) [self.windowController.window.contentView layer];
         CAShapeLayer *yellowLayer = (CAShapeLayer *) [layer.sublayers objectAtIndex:0];
 
         layer.path = path;
