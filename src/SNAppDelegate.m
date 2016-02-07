@@ -44,6 +44,11 @@
 @implementation SNAppDelegate
 
 
++ (NSURL *)repositoryURL {
+    return [NSURL URLWithString:@"https://github.com/gbrueckner/Snapp/"];
+}
+
+
 - (instancetype)init {
 
     if ((self = [super init])) {
@@ -97,7 +102,7 @@
 
         _prefsWindowController.contentViewController = prefsViewController;
 
-        [_prefsWindowController.window setFrame:NSMakeRect(0, 0, 298, 326)
+        [_prefsWindowController.window setFrame:NSMakeRect(0, 0, 298, 346)
                                         display:YES];
 
         [prefsWindow release];
@@ -305,10 +310,49 @@
 }
 
 
+- (void)checkForUpdates:(id)sender {
+
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"checkForUpdates"])
+        return;
+
+    // Retrieve the up-to-date Info.plist dictionary from the repository.
+    NSURL *remoteInfoDictionaryURL = [NSURL URLWithString:@"https://raw.githubusercontent.com/gbrueckner/Snapp/master/Snapp.app/Contents/Info.plist"];
+    NSDictionary *remoteInfoDictionary = [NSDictionary dictionaryWithContentsOfURL:remoteInfoDictionaryURL];
+    NSString *newestVersion = [remoteInfoDictionary objectForKey:@"CFBundleVersion"];
+
+    NSString *currentVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
+
+    if ([newestVersion compare:currentVersion options:NSNumericSearch] == NSOrderedDescending) {
+
+        NSAlert *alert = [[NSAlert alloc] init];
+
+        alert.alertStyle = NSInformationalAlertStyle;
+        alert.messageText = @"Snapp Update Available";
+        alert.informativeText = @"There's a new version of Snapp available! Would you like to visit Snapp's GitHub repository to update?";
+        [alert addButtonWithTitle:@"No"];
+        [alert addButtonWithTitle:@"Yes"];
+
+        // Set the key equivalent of the "Yes" button to "Return" and that
+        // of the "No" button to "Escape".
+        [[alert.buttons objectAtIndex:0] setKeyEquivalent:@"\E"];
+        [[alert.buttons objectAtIndex:1] setKeyEquivalent:@"\r"];
+
+        // If "Yes" was clicked, open Snapp's GitHub respository in the
+        // default browser.
+        if ([alert runModal] == NSAlertSecondButtonReturn)
+            [[NSWorkspace sharedWorkspace] openURL:[SNAppDelegate repositoryURL]];
+
+        [alert release];
+    }
+}
+
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 
     // Set default user defaults.
-    [[NSUserDefaults standardUserDefaults] registerDefaults:@{@"openAtLogin": @NO, @"playSnapSound": @YES}];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:@{    @"openAtLogin": @NO,
+                                                                @"playSnapSound": @YES,
+                                                              @"checkForUpdates": @YES}];
 
     NSAlert *alert = [[NSAlert alloc] init];
 
@@ -330,6 +374,10 @@
 
     // Unhide the app. Otherwise, the indicator window might not be shown.
     [NSApp unhide];
+
+    // Check for updates asynchronously.
+    [self performSelectorInBackground:@selector(checkForUpdates:)
+                           withObject:self];
 }
 
 

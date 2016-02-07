@@ -20,6 +20,7 @@
 #import "SNPreferencesViewController.h"
 #import "NSAttributedString+Hyperlink.h"
 #import "NSFont+Additions.h"
+#import "SNAppDelegate.h"
 @import ServiceManagement;
 
 
@@ -70,6 +71,16 @@
     [self.view addSubview:playSoundCheckbox];
     [playSoundCheckbox release];
 
+    // Create the update checkbox.
+    NSButton *updateCheckbox = [[NSButton alloc] initWithFrame:NSZeroRect];
+    updateCheckbox.title = @"Check for updates automatically";
+    updateCheckbox.buttonType = NSSwitchButton;
+    updateCheckbox.state = [[NSUserDefaults standardUserDefaults] boolForKey:@"checkForUpdates"] ? NSOnState : NSOffState;
+    updateCheckbox.target = self;
+    updateCheckbox.action = @selector(updateCheckboxClicked:);
+    [self.view addSubview:updateCheckbox];
+    [updateCheckbox release];
+
     // Create the quit button.
     NSButton *quitButton = [[NSButton alloc] initWithFrame:NSZeroRect];
     quitButton.title = @"Quit Snapp";
@@ -83,7 +94,7 @@
     NSTextView *ossLabel = [[NSTextView alloc] initWithFrame:NSZeroRect];
     NSMutableAttributedString *ossLabelString = [[NSMutableAttributedString alloc] initWithString:@"Snapp is open source software! To learn more, visit the "];
     [ossLabelString appendAttributedString:[NSAttributedString hyperlinkFromString:@"Snapp GitHub repository"
-                                   withURL:[NSURL URLWithString:@"https://github.com/gbrueckner/Snapp"]]];
+                                   withURL:[SNAppDelegate repositoryURL]]];
     NSAttributedString *dotString = [[NSAttributedString alloc] initWithString:@"."];
     [ossLabelString appendAttributedString:dotString];
     ossLabel.textStorage.attributedString = ossLabelString;
@@ -102,6 +113,7 @@
                            @"infoLabel": infoLabel,
                        @"loginCheckbox": loginCheckbox,
                    @"playSoundCheckbox": playSoundCheckbox,
+                      @"updateCheckbox": updateCheckbox,
                           @"quitButton": quitButton,
                             @"ossLabel": ossLabel};
 
@@ -110,7 +122,7 @@
     }];
 
     [self.view addConstraints:
-        [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-5-[iconView]-[infoLabel]-20-[loginCheckbox]-[playSoundCheckbox]-[quitButton]-[ossLabel]-|"
+        [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-5-[iconView]-[infoLabel]-20-[loginCheckbox]-[playSoundCheckbox]-[updateCheckbox]-[quitButton]-[ossLabel]-|"
                                                 options:NSLayoutFormatAlignAllCenterX
                                                 metrics:nil
                                                   views:views]];
@@ -140,6 +152,12 @@
                                                   views:views]];
 
     [self.view addConstraints:
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=20-[updateCheckbox]->=20-|"
+                                                options:0
+                                                metrics:nil
+                                                  views:views]];
+
+    [self.view addConstraints:
         [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=20-[quitButton]->=20-|"
                                                 options:0
                                                 metrics:nil
@@ -156,6 +174,15 @@
                                      attribute:NSLayoutAttributeLeft
                                      relatedBy:NSLayoutRelationEqual
                                         toItem:playSoundCheckbox
+                                     attribute:NSLayoutAttributeLeft
+                                    multiplier:1
+                                      constant:0]];
+
+    [self.view addConstraint:
+        [NSLayoutConstraint constraintWithItem:playSoundCheckbox
+                                     attribute:NSLayoutAttributeLeft
+                                     relatedBy:NSLayoutRelationEqual
+                                        toItem:updateCheckbox
                                      attribute:NSLayoutAttributeLeft
                                     multiplier:1
                                       constant:0]];
@@ -177,6 +204,12 @@
 - (void)playSoundCheckboxClicked:(NSButton *)playSoundCheckbox {
      [[NSUserDefaults standardUserDefaults] setBool:(playSoundCheckbox.state == NSOnState)
                                              forKey:@"playSnapSound"];
+}
+
+
+- (void)updateCheckboxClicked:(NSButton *)updateCheckbox {
+     [[NSUserDefaults standardUserDefaults] setBool:(updateCheckbox.state == NSOnState)
+                                             forKey:@"checkForUpdates"];
 }
 
 

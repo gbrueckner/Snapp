@@ -22,4 +22,7 @@
 
 
 @interface SNAppDelegate : NSObject <NSApplicationDelegate, SNWindowTrackerDelegate>
+
++ (NSURL *)repositoryURL;
+
 @end
