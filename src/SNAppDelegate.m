@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2015-2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -347,6 +347,16 @@
 }
 
 
+- (void)openAccessibilityPreferences {
+    NSURL *scriptURL = [[NSBundle mainBundle] URLForResource:@"OpenAccessibilityPreferences"
+                                               withExtension:@"scpt"];
+    NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:scriptURL
+                                                                   error:NULL];
+    [script executeAndReturnError:NULL];
+    [script release];
+}
+
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 
     // Set default user defaults.
@@ -359,6 +369,10 @@
     alert.alertStyle = NSInformationalAlertStyle;
     alert.messageText = @"Enable Accessibility Features";
     alert.informativeText = @"Snapp requires accessibility features. Please go to System Preferences > Security & Privacy > Accessibility to enable these features, then click OK.";
+
+    // Open the Accessibility pane in System Preferences.
+    if (!AXIsProcessTrusted())
+        [self openAccessibilityPreferences];
 
     // Using AXIsProcessTrustedWithOptions really has no benefit.
     while (!AXIsProcessTrusted())
