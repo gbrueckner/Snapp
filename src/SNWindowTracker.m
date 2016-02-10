@@ -64,9 +64,17 @@ CGEventRef mouseEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     NSPoint flippedPoint = [NSScreen flipPoint:eventPoint];
 
     switch (type) {
-        case kCGEventLeftMouseDown:
-            [(SNWindowTracker *)refcon leftMouseDownAtPoint:flippedPoint];
-            break;
+        case kCGEventLeftMouseDown: {
+                AXUIElementRef windowElement;
+                AXError error = AXUIElementCopyWindowAtPosition(eventPoint, &windowElement);
+                if (error == kAXErrorSuccess) {
+                    SNWindow *window = [[SNWindow alloc] initWithWindowElement:windowElement];
+                    [(SNWindowTracker *)refcon focusedWindowDidChange:window];
+                    [window release];
+                }
+                [(SNWindowTracker *)refcon leftMouseDownAtPoint:flippedPoint];
+                break;
+            }
         case kCGEventLeftMouseDragged:
             [(SNWindowTracker *)refcon leftMouseDraggedToPoint:flippedPoint];
             break;

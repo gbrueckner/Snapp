@@ -27,6 +27,7 @@ AXError AXUIElementGetWindow(AXUIElementRef window, CGWindowID *windowID);
 AXError AXUIElementGetSize(AXUIElementRef element, CGSize *size);
 AXError AXUIElementGetOrigin(AXUIElementRef element, CGPoint *origin);
 AXError AXUIElementGetFrame(AXUIElementRef element, CGRect *frame);
+AXError AXUIElementCopyWindowAtPosition(CGPoint position, AXUIElementRef *window);
 
 #pragma mark - Setters
 

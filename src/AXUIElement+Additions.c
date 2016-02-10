@@ -71,6 +71,52 @@ AXError AXUIElementGetFrame(AXUIElementRef element, CGRect *frame) {
 }
 
 
+AXError AXUIElementCopyWindowAtPosition(CGPoint position, AXUIElementRef *window) {
+
+    AXUIElementRef systemWideElement = AXUIElementCreateSystemWide();
+    AXUIElementRef element = NULL;
+
+    // First, retrieve the element at the given position.
+    AXError error = AXUIElementCopyElementAtPosition(systemWideElement,
+                                                     position.x,
+                                                     position.y,
+                                                     &element);
+    if (error != kAXErrorSuccess)
+        goto err;
+
+    // If this element is a window, return it.
+    NSString *role = nil;
+    error = AXUIElementCopyAttributeValue(element,
+                                          kAXRoleAttribute,
+                                          (CFTypeRef *) &role);
+    if (error != kAXErrorSuccess)
+        goto err;
+
+    BOOL isWindow = [role isEqualToString:NSAccessibilityWindowRole];
+    [role release];
+    if (isWindow) {
+        *window = element;
+        return kAXErrorSuccess;
+    }
+
+    // Otherwise, return the window attribute.
+    error = AXUIElementCopyAttributeValue(element,
+                                          kAXWindowAttribute,
+                                          (CFTypeRef *)window);
+
+    if (error == kAXErrorSuccess) {
+        CFRelease(element);
+        return kAXErrorSuccess;
+    }
+
+err:
+    if (element != NULL)
+        CFRelease(element);
+    *window = NULL;
+    return error;
+}
+
+
 #pragma mark - Setters
 
 
