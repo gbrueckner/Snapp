@@ -389,9 +389,18 @@
     // Unhide the app. Otherwise, the indicator window might not be shown.
     [NSApp unhide];
 
-    // Check for updates asynchronously.
-    [self performSelectorInBackground:@selector(checkForUpdates:)
-                           withObject:self];
+    // Check for updates once a day.
+    NSTimer *checkForUpdatesTimer = [[NSTimer alloc] initWithFireDate:[NSDate date]
+                                                             interval:86400
+                                                               target:self
+                                                             selector:@selector(checkForUpdates:)
+                                                             userInfo:nil
+                                                              repeats:YES];
+
+    [[NSRunLoop currentRunLoop] addTimer:checkForUpdatesTimer
+                                 forMode:NSDefaultRunLoopMode];
+
+    [checkForUpdatesTimer release];
 }
 
 
