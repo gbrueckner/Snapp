@@ -73,30 +73,32 @@ AXError AXUIElementGetFrame(AXUIElementRef element, CGRect *frame) {
 
 AXError AXUIElementCopyWindowAtPosition(CGPoint position, AXUIElementRef *window) {
 
+    *window = NULL;
+
     AXUIElementRef systemWideElement = AXUIElementCreateSystemWide();
     AXUIElementRef element = NULL;
+    CFStringRef role = NULL;
 
     // First, retrieve the element at the given position.
     AXError error = AXUIElementCopyElementAtPosition(systemWideElement,
                                                      position.x,
                                                      position.y,
                                                      &element);
+
     if (error != kAXErrorSuccess)
-        goto err;
+        goto end;
 
     // If this element is a window, return it.
-    NSString *role = nil;
     error = AXUIElementCopyAttributeValue(element,
                                           kAXRoleAttribute,
                                           (CFTypeRef *) &role);
     if (error != kAXErrorSuccess)
-        goto err;
+        goto end;
 
-    BOOL isWindow = [role isEqualToString:NSAccessibilityWindowRole];
-    [role release];
-    if (isWindow) {
+    if (CFStringCompare(role, kAXWindowRole, 0) == kCFCompareEqualTo) {
         *window = element;
-        return kAXErrorSuccess;
+        CFRetain(*window);
+        goto end;
     }
 
     // Otherwise, return the window attribute.
@@ -104,15 +106,12 @@ AXError AXUIElementCopyWindowAtPosition(CGPoint position, AXUIElementRef *window
                                           kAXWindowAttribute,
                                           (CFTypeRef *)window);
 
-    if (error == kAXErrorSuccess) {
-        CFRelease(element);
-        return kAXErrorSuccess;
-    }
-
-err:
+end:
+    CFRelease(systemWideElement);
     if (element != NULL)
         CFRelease(element);
-    *window = NULL;
+    if (role != NULL)
+        CFRelease(role);
     return error;
 }
 
