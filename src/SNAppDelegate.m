@@ -34,6 +34,8 @@
 @property(readonly) NSWindowController *windowController;
 @property(readonly) SNWindowTracker *windowTracker;
 @property(readonly) NSWindowController *prefsWindowController;
+@property(readonly) NSAlert *accessibilityAlert;
+@property BOOL accessibilityAlertIsHidden;
 
 @end
 
@@ -52,6 +54,13 @@
 - (instancetype)init {
 
     if ((self = [super init])) {
+
+        _accessibilityAlert = [[NSAlert alloc] init];
+        _accessibilityAlert.alertStyle = NSInformationalAlertStyle;
+        _accessibilityAlert.messageText = @"Enable Accessibility Features";
+        _accessibilityAlert.informativeText = @"Snapp requires accessibility features. Please go to System Preferences > Security & Privacy > Accessibility to enable these features, then click OK.";
+
+        _accessibilityAlertIsHidden = YES;
 
         _storedWindowSizes = [[NSMutableDictionary alloc] init];
         _windowTracker = [[SNWindowTracker alloc] init];
@@ -118,6 +127,7 @@
     [_prefsWindowController release];
     [_storedWindowSizes release];
     [_windowController release];
+    [_accessibilityAlert release];
     [super dealloc];
 }
 
@@ -310,7 +320,7 @@
 }
 
 
-- (void)checkForUpdates:(id)sender {
+- (void)checkForUpdates:(NSTimer *)timer {
 
     if (![[NSUserDefaults standardUserDefaults] boolForKey:@"checkForUpdates"])
         return;
@@ -357,6 +367,38 @@
 }
 
 
+- (void)showAccessibilityAlert:(id)sender {
+    self.accessibilityAlertIsHidden = NO;
+    [self.accessibilityAlert runModal];
+    [self.accessibilityAlert.window center];
+    self.accessibilityAlertIsHidden = YES;
+}
+
+
+- (void)checkForAccessibilityAPI:(id)object {
+
+    // If Snapp isn't a trusted process and the alert isn't shown already, show
+    // it.
+    if (!AXIsProcessTrusted() && self.accessibilityAlertIsHidden) {
+        [self performSelectorOnMainThread:@selector(showAccessibilityAlert:)
+                               withObject:nil
+                            waitUntilDone:NO];
+        [self openAccessibilityPreferences];
+    }
+    // If Snapp is a trusted process and the alert is shown, hide it.
+    else if (AXIsProcessTrusted() && !self.accessibilityAlertIsHidden) {
+        [NSApp abortModal];
+        self.accessibilityAlertIsHidden = YES;
+    }
+
+    // Continuously recheck the trust status. If the process is trusted, it is
+    // safe to recheck every 10 seconds. If the process is not trusted, recheck
+    // every 0.1 seconds to quickly detect when the alert can be hidden.
+    [NSThread sleepForTimeInterval:(AXIsProcessTrusted() ? 10 : 0.1)];
+    [self checkForAccessibilityAPI:object];
+}
+
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 
     // Set default user defaults.
@@ -364,21 +406,9 @@
                                                                 @"playSnapSound": @YES,
                                                               @"checkForUpdates": @YES}];
 
-    NSAlert *alert = [[NSAlert alloc] init];
-
-    alert.alertStyle = NSInformationalAlertStyle;
-    alert.messageText = @"Enable Accessibility Features";
-    alert.informativeText = @"Snapp requires accessibility features. Please go to System Preferences > Security & Privacy > Accessibility to enable these features, then click OK.";
-
-    // Open the Accessibility pane in System Preferences.
-    if (!AXIsProcessTrusted())
-        [self openAccessibilityPreferences];
-
-    // Using AXIsProcessTrustedWithOptions really has no benefit.
-    while (!AXIsProcessTrusted())
-        [alert runModal];
-
-    [alert release];
+    [NSThread detachNewThreadSelector:@selector(checkForAccessibilityAPI:)
+                             toTarget:self
+                           withObject:nil];
 
     self.windowTracker.delegate = self;
 
