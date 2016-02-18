@@ -35,7 +35,7 @@
 @property(readonly) SNWindowTracker *windowTracker;
 @property(readonly) NSWindowController *prefsWindowController;
 @property(readonly) NSAlert *accessibilityAlert;
-@property BOOL accessibilityAlertIsHidden;
+@property int32_t accessibilityAlertIsHidden;
 
 @end
 
@@ -368,9 +368,7 @@
 
 
 - (void)showAccessibilityAlert:(id)sender {
-    self.accessibilityAlertIsHidden = NO;
     [self.accessibilityAlert runModal];
-    [self.accessibilityAlert.window center];
     self.accessibilityAlertIsHidden = YES;
 }
 
@@ -379,17 +377,15 @@
 
     // If Snapp isn't a trusted process and the alert isn't shown already, show
     // it.
-    if (!AXIsProcessTrusted() && self.accessibilityAlertIsHidden) {
+    if (!AXIsProcessTrusted() && OSAtomicCompareAndSwap32(YES, NO, &_accessibilityAlertIsHidden)) {
         [self performSelectorOnMainThread:@selector(showAccessibilityAlert:)
                                withObject:nil
                             waitUntilDone:NO];
         [self openAccessibilityPreferences];
     }
     // If Snapp is a trusted process and the alert is shown, hide it.
-    else if (AXIsProcessTrusted() && !self.accessibilityAlertIsHidden) {
+    else if (AXIsProcessTrusted() && OSAtomicCompareAndSwap32(NO, YES, &_accessibilityAlertIsHidden))
         [NSApp abortModal];
-        self.accessibilityAlertIsHidden = YES;
-    }
 
     // Continuously recheck the trust status. If the process is trusted, it is
     // safe to recheck every 10 seconds. If the process is not trusted, recheck
