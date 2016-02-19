@@ -111,9 +111,6 @@
 
         _prefsWindowController.contentViewController = prefsViewController;
 
-        [_prefsWindowController.window setFrame:NSMakeRect(0, 0, 298, 346)
-                                        display:YES];
-
         [prefsWindow release];
         [prefsViewController release];
     }

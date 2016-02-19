@@ -21,6 +21,8 @@
 #import "NSAttributedString+Hyperlink.h"
 #import "NSFont+Additions.h"
 #import "SNAppDelegate.h"
+#import "SNTextView.h"
+#import "SNView.h"
 @import ServiceManagement;
 
 
@@ -29,7 +31,7 @@
 
 - (void)loadView {
 
-    self.view = [[NSView alloc] initWithFrame:NSZeroRect];
+    self.view = [[SNView alloc] initWithFrame:NSZeroRect];
 
     // Create the icon view.
     NSImageView *iconView = [[NSImageView alloc] initWithFrame:NSZeroRect];
@@ -40,14 +42,15 @@
     [iconView release];
 
     // Create the info label.
-    NSTextField *infoLabel = [[NSTextField alloc] initWithFrame:NSZeroRect];
-    infoLabel.stringValue = @"Open Snapp twice to show this window.";
+    NSTextView *infoLabel = [[SNTextView alloc] initWithFrame:NSZeroRect];
+    infoLabel.string = @"Open Snapp twice to show this window.";
     infoLabel.alignment = NSCenterTextAlignment;
-    infoLabel.bezeled = NO;
     infoLabel.drawsBackground = NO;
     infoLabel.font = [NSFont labelFont];
     infoLabel.selectable = NO;
     infoLabel.textColor = [NSColor darkGrayColor];
+    [infoLabel setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow
+                                        forOrientation:NSLayoutConstraintOrientationHorizontal];
     [self.view addSubview:infoLabel];
     [infoLabel release];
 
@@ -91,7 +94,7 @@
     [quitButton release];
 
     // Create the OSS label.
-    NSTextView *ossLabel = [[NSTextView alloc] initWithFrame:NSZeroRect];
+    NSTextView *ossLabel = [[SNTextView alloc] initWithFrame:NSZeroRect];
     NSMutableAttributedString *ossLabelString = [[NSMutableAttributedString alloc] initWithString:@"Snapp is open source software! To learn more, visit the "];
     [ossLabelString appendAttributedString:[NSAttributedString hyperlinkFromString:@"Snapp GitHub repository"
                                    withURL:[SNAppDelegate repositoryURL]]];
@@ -103,6 +106,8 @@
     ossLabel.editable = NO;
     ossLabel.font = [NSFont labelFont];
     ossLabel.textColor = [NSColor darkGrayColor];
+    [ossLabel setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow
+                                       forOrientation:NSLayoutConstraintOrientationHorizontal];
     [self.view addSubview:ossLabel];
     [dotString release];
     [ossLabel release];
@@ -122,7 +127,7 @@
     }];
 
     [self.view addConstraints:
-        [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-5-[iconView]-[infoLabel]-20-[loginCheckbox]-[playSoundCheckbox]-[updateCheckbox]-[quitButton]-[ossLabel]-|"
+        [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-5-[iconView]-[infoLabel]-18-[loginCheckbox]-[playSoundCheckbox]-[updateCheckbox]-[quitButton]-[ossLabel]-8-|"
                                                 options:NSLayoutFormatAlignAllCenterX
                                                 metrics:nil
                                                   views:views]];
