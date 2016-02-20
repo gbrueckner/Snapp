@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2015-2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -23,14 +23,26 @@
 @implementation NSScreen (NSScreenAdditions)
 
 
-+ (NSScreen *)screenAtLocation:(CGPoint)location {
++ (NSArray *)screensAtLocation:(CGPoint)location withFuzziness:(CGFloat)fuzziness {
+
+    NSMutableArray *screens = [NSMutableArray array];
 
     for (NSScreen *screen in [NSScreen screens]) {
-        if (NSMouseInRect(location, screen.frame, NO))
-            return screen;
+        NSRect frame = NSInsetRect(screen.frame, -fuzziness, -fuzziness);
+        if (NSMouseInRect(location, frame, NO))
+            [screens addObject:screen];
     }
 
-    return nil;
+    return screens;
+}
+
+
++ (NSScreen *)screenAtLocation:(CGPoint)location {
+
+    NSArray *screens = [NSScreen screensAtLocation:location
+                                     withFuzziness:0];
+
+    return (screens.count == 1) ? screens.firstObject : nil;
 }
 
 

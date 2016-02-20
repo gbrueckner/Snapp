@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2015-2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -21,6 +21,11 @@
 
 
 @interface NSScreen (NSScreenAdditions)
+
+// This method returns an array of screens so that the given location has a
+// rectilinear distance of at most fuzziness from some location within the
+// screen's frame.
++ (NSArray *)screensAtLocation:(NSPoint)location withFuzziness:(CGFloat)fuzziness;
 
 + (NSScreen *)screenAtLocation:(NSPoint)location;
 + (NSScreen *)screenAtZeroLocation;

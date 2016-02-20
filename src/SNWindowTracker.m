@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2015-2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -137,6 +137,14 @@ CGEventRef mouseEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     CGFloat marginRight = 1;
     CGFloat marginBottom = 1;
     CGFloat marginLeft = 1;
+
+    // Use smart snapping, i.e. if this point is in the vicinity of multiple
+    // screens, make the hot zones larger.
+    if ([NSScreen screensAtLocation:point withFuzziness:menubarHeight].count > 1) {
+        marginRight = menubarHeight;
+        marginBottom = menubarHeight;
+        marginLeft = menubarHeight;
+    }
 
     if (point.x <= NSMinX(screenFrame) + marginLeft) {
         if (point.y <= NSMinY(screenFrame) + marginBottom)
