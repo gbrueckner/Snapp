@@ -18,7 +18,8 @@
 
 
 @import AppKit;
+#import "SNChildViewController.h"
 
 
-@interface SNPreferencesViewController : NSViewController
+@interface SNPreferencesViewController : SNChildViewController
 @end

@@ -24,5 +24,6 @@
 @interface SNAppDelegate : NSObject <NSApplicationDelegate, SNWindowTrackerDelegate>
 
 + (NSURL *)repositoryURL;
++ (void)openAccessibilityPreferences;
 
 @end

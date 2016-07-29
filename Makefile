@@ -1,7 +1,8 @@
-CFLAGS = -Wall -ObjC -fno-objc-arc -fmodules -O3
+INCS = -I./lib/GBVersionTracking
+CFLAGS = -Wall -ObjC -fno-objc-arc -fmodules -O3 $(INCS)
 
 SRC_C = $(wildcard src/*.c)
-SRC_OBJC = $(wildcard src/*.m)
+SRC_OBJC = $(wildcard src/*.m) $(wildcard lib/GBVersionTracking/GBVersionTracking/*.m)
 OBJ = $(SRC_C:.c=.o) $(SRC_OBJC:.m=.o)
 
 Snapp.app/Contents/MacOS/Snapp: $(OBJ)
@@ -24,4 +25,5 @@ install:
 uninstall:
 	osascript -e 'quit app "Snapp"'
 	rm -rf /Applications/Snapp.app/
-	rm -rf ~/Library/Preferences/Snapp.plist
+	defaults delete Snapp
+	sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db "delete from access where client='Snapp';"

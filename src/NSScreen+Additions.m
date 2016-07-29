@@ -40,7 +40,7 @@
 + (NSScreen *)screenAtLocation:(CGPoint)location {
 
     NSArray *screens = [NSScreen screensAtLocation:location
-                                     withFuzziness:0];
+                                     withFuzziness:1];
 
     return (screens.count == 1) ? screens.firstObject : nil;
 }

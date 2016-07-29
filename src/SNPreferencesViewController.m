@@ -32,14 +32,7 @@
 - (void)loadView {
 
     self.view = [[SNView alloc] initWithFrame:NSZeroRect];
-
-    // Create the icon view.
-    NSImageView *iconView = [[NSImageView alloc] initWithFrame:NSZeroRect];
-    iconView.image = [NSApp applicationIconImage];
-    iconView.image.size = NSMakeSize(128, 128);
-    iconView.imageScaling = NSImageScaleAxesIndependently;
-    [self.view addSubview:iconView];
-    [iconView release];
+    self.view.translatesAutoresizingMaskIntoConstraints = NO;
 
     // Create the info label.
     NSTextView *infoLabel = [[SNTextView alloc] initWithFrame:NSZeroRect];
@@ -90,6 +83,8 @@
     quitButton.bezelStyle = NSRoundedBezelStyle;
     quitButton.target = NSApp;
     quitButton.action = @selector(terminate:);
+    quitButton.keyEquivalent = @"q";
+    quitButton.keyEquivalentModifierMask = NSCommandKeyMask;
     [self.view addSubview:quitButton];
     [quitButton release];
 
@@ -114,62 +109,55 @@
     [ossLabelString release];
 
     // Layout the subviews.
-    NSDictionary *views = @{@"iconView": iconView,
-                           @"infoLabel": infoLabel,
-                       @"loginCheckbox": loginCheckbox,
-                   @"playSoundCheckbox": playSoundCheckbox,
-                      @"updateCheckbox": updateCheckbox,
-                          @"quitButton": quitButton,
-                            @"ossLabel": ossLabel};
+    NSDictionary *views = @{@"infoLabel": infoLabel,
+                        @"loginCheckbox": loginCheckbox,
+                    @"playSoundCheckbox": playSoundCheckbox,
+                       @"updateCheckbox": updateCheckbox,
+                           @"quitButton": quitButton,
+                             @"ossLabel": ossLabel};
 
     [views enumerateKeysAndObjectsUsingBlock:^(NSString *viewName, NSView *view, BOOL *stop) {
         view.translatesAutoresizingMaskIntoConstraints = NO;
     }];
 
     [self.view addConstraints:
-        [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-5-[iconView]-[infoLabel]-18-[loginCheckbox]-[playSoundCheckbox]-[updateCheckbox]-[quitButton]-[ossLabel]-8-|"
+        [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[infoLabel]-18-[loginCheckbox]-[playSoundCheckbox]-[updateCheckbox]-[quitButton]-[ossLabel]-8-|"
                                                 options:NSLayoutFormatAlignAllCenterX
                                                 metrics:nil
                                                   views:views]];
 
     [self.view addConstraints:
-        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[infoLabel]-|"
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[infoLabel]|"
                                                 options:0
                                                 metrics:nil
                                                   views:views]];
 
     [self.view addConstraints:
-        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[ossLabel]-|"
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[ossLabel]|"
                                                 options:0
                                                 metrics:nil
                                                   views:views]];
 
     [self.view addConstraints:
-        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=20-[loginCheckbox]->=20-|"
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=0-[loginCheckbox]->=0-|"
                                                 options:0
                                                 metrics:nil
                                                   views:views]];
 
     [self.view addConstraints:
-        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=20-[playSoundCheckbox]->=20-|"
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=0-[playSoundCheckbox]->=0-|"
                                                 options:0
                                                 metrics:nil
                                                   views:views]];
 
     [self.view addConstraints:
-        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=20-[updateCheckbox]->=20-|"
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=0-[updateCheckbox]->=0-|"
                                                 options:0
                                                 metrics:nil
                                                   views:views]];
 
     [self.view addConstraints:
-        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=20-[quitButton]->=20-|"
-                                                options:0
-                                                metrics:nil
-                                                  views:views]];
-
-    [self.view addConstraints:
-        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=10-[iconView]->=10-|"
+        [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=0-[quitButton]->=0-|"
                                                 options:0
                                                 metrics:nil
                                                   views:views]];

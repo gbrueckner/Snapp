@@ -23,17 +23,32 @@
 @implementation SNView
 
 
+- (void)visit:(NSView *)view {
+
+    for (NSView *subview in view.subviews)
+        [self visit:subview];
+
+    if ([view isKindOfClass:[NSText class]]) {
+        NSText *text = (NSText *) view;
+        text.maxSize = NSMakeSize(text.frame.size.width, CGFLOAT_MAX);
+        [text invalidateIntrinsicContentSize];
+    }
+}
+
+
 - (void)layout {
 
     [super layout];
 
-    for (NSView *subview in self.subviews) {
+    [self visit:self];
+
+    /*for (NSView *subview in self.subviews) {
         if ([subview isKindOfClass:[NSText class]]) {
             NSText *text = (NSText *) subview;
             text.maxSize = NSMakeSize(text.frame.size.width, CGFLOAT_MAX);
             [text invalidateIntrinsicContentSize];
         }
-    }
+    }*/
 
     [super layout];
 }

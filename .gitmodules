@@ -1,0 +1,3 @@
+[submodule "lib/GBVersionTracking"]
+	path = lib/GBVersionTracking
+	url = https://github.com/lmirosevic/GBVersionTracking.git

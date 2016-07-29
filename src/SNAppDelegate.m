@@ -21,7 +21,9 @@
 #import "AXUIElement+Additions.h"
 #import "NSAttributedString+Hyperlink.h"
 #import "NSScreen+Additions.h"
-#import "SNPreferencesViewController.h"
+#import "SNViewController.h"
+#import "SNPageViewController.h"
+#import <GBVersionTracking/GBVersionTracking.h>
 @import QuartzCore;
 
 
@@ -36,8 +38,16 @@
 @property(readonly) NSWindowController *prefsWindowController;
 @property(readonly) NSAlert *accessibilityAlert;
 @property int32_t accessibilityAlertIsHidden;
+@property BOOL walkthroughIsInProgress;
+
+@property NSUInteger visibility;
 
 @end
+
+
+#define kPrefsWindowVisibilityUser          0x1
+#define kPrefsWindowVisibilityAccessibility 0x2
+#define kPrefsWindowVisibilityUpdate        0x4
 
 
 #pragma mark - SNAppDelegate implementation
@@ -99,15 +109,22 @@
 
         // Create the preferences window controller.
         NSWindow *prefsWindow = [[NSWindow alloc] initWithContentRect:NSZeroRect
-                                                            styleMask:(NSTitledWindowMask | NSClosableWindowMask)
+                                                            styleMask:(NSTitledWindowMask | NSClosableWindowMask | NSFullSizeContentViewWindowMask)
                                                               backing:NSBackingStoreBuffered
                                                                 defer:NO];
         prefsWindow.title = @"Snapp";
+        prefsWindow.titlebarAppearsTransparent = YES;
+        [prefsWindow standardWindowButton:NSWindowMiniaturizeButton].hidden = YES;
+        [prefsWindow standardWindowButton:NSWindowZoomButton].hidden = YES;
+        [prefsWindow standardWindowButton:NSWindowCloseButton].target = self;
+        [prefsWindow standardWindowButton:NSWindowCloseButton].action = @selector(hidePrefsWindow:);
+        [prefsWindow setAnchorAttribute:NSLayoutAttributeCenterX
+                     forOrientation:NSLayoutConstraintOrientationHorizontal];
 
         _prefsWindowController = [[NSWindowController alloc] initWithWindow:prefsWindow];
 
-        NSViewController *prefsViewController = [[SNPreferencesViewController alloc] initWithNibName:nil
-                                                                                              bundle:nil];
+        NSViewController *prefsViewController = [[SNViewController alloc] initWithNibName:nil
+                                                                                   bundle:nil];
 
         _prefsWindowController.contentViewController = prefsViewController;
 
@@ -121,9 +138,9 @@
 
 - (void)dealloc {
     [_windowTracker release];
-    [_prefsWindowController release];
-    [_storedWindowSizes release];
     [_windowController release];
+    [_storedWindowSizes release];
+    [_prefsWindowController release];
     [_accessibilityAlert release];
     [super dealloc];
 }
@@ -330,31 +347,14 @@
     NSString *currentVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
 
     if ([newestVersion compare:currentVersion options:NSNumericSearch] == NSOrderedDescending) {
-
-        NSAlert *alert = [[NSAlert alloc] init];
-
-        alert.alertStyle = NSInformationalAlertStyle;
-        alert.messageText = @"Snapp Update Available";
-        alert.informativeText = @"There's a new version of Snapp available! Would you like to visit Snapp's GitHub repository to update?";
-        [alert addButtonWithTitle:@"No"];
-        [alert addButtonWithTitle:@"Yes"];
-
-        // Set the key equivalent of the "Yes" button to "Return" and that
-        // of the "No" button to "Escape".
-        [[alert.buttons objectAtIndex:0] setKeyEquivalent:@"\E"];
-        [[alert.buttons objectAtIndex:1] setKeyEquivalent:@"\r"];
-
-        // If "Yes" was clicked, open Snapp's GitHub respository in the
-        // default browser.
-        if ([alert runModal] == NSAlertSecondButtonReturn)
-            [[NSWorkspace sharedWorkspace] openURL:[SNAppDelegate repositoryURL]];
-
-        [alert release];
+        self.visibility |= kPrefsWindowVisibilityUpdate;
+        [self.prefsWindowController.contentViewController transitionToUpdateViewController:self];
+        [self showPrefsWindow:self];
     }
 }
 
 
-- (void)openAccessibilityPreferences {
++ (void)openAccessibilityPreferences {
     NSURL *scriptURL = [[NSBundle mainBundle] URLForResource:@"OpenAccessibilityPreferences"
                                                withExtension:@"scpt"];
     NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:scriptURL
@@ -364,25 +364,49 @@
 }
 
 
-- (void)showAccessibilityAlert:(id)sender {
-    [self.accessibilityAlert runModal];
-    self.accessibilityAlertIsHidden = YES;
+- (void)showPrefsWindow:(id) sender {
+    if (!self.prefsWindowController.window.visible)
+        [self.prefsWindowController.window center];
+    [self.prefsWindowController.window makeKeyAndOrderFront:self];
+}
+
+
+- (void)hidePrefsWindow:(id)sender {
+    self.visibility = 0;
+    [self.prefsWindowController.window orderOut:self];
 }
 
 
 - (void)checkForAccessibilityAPI:(id)object {
 
+    NSLog(@"trusted? %@!", AXIsProcessTrusted() ? @"YES" : @"NO");
+
     // If Snapp isn't a trusted process and the alert isn't shown already, show
     // it.
     if (!AXIsProcessTrusted() && OSAtomicCompareAndSwap32(YES, NO, &_accessibilityAlertIsHidden)) {
-        [self performSelectorOnMainThread:@selector(showAccessibilityAlert:)
-                               withObject:nil
-                            waitUntilDone:NO];
-        [self openAccessibilityPreferences];
+        [self.prefsWindowController.contentViewController
+            performSelectorOnMainThread:@selector(transitionToAccessibilityViewController:)
+                             withObject:nil
+                          waitUntilDone:NO];
+        [SNAppDelegate openAccessibilityPreferences];
+
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            self.visibility |= kPrefsWindowVisibilityAccessibility;
+            [self showPrefsWindow:self];
+        });
     }
     // If Snapp is a trusted process and the alert is shown, hide it.
-    else if (AXIsProcessTrusted() && OSAtomicCompareAndSwap32(NO, YES, &_accessibilityAlertIsHidden))
-        [NSApp abortModal];
+    else if (AXIsProcessTrusted() && OSAtomicCompareAndSwap32(NO, YES, &_accessibilityAlertIsHidden)) {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            self.visibility &= ~kPrefsWindowVisibilityAccessibility;
+            if (!self.visibility)
+                [self hidePrefsWindow:self];
+        });
+        [self.prefsWindowController.contentViewController
+            performSelectorOnMainThread:@selector(transitionToPreferencesViewController:)
+                             withObject:nil
+                          waitUntilDone:NO];
+    }
 
     // Continuously recheck the trust status. If the process is trusted, it is
     // safe to recheck every 10 seconds. If the process is not trusted, recheck
@@ -392,7 +416,7 @@
 }
 
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+- (void)setup {
 
     // Set default user defaults.
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{    @"openAtLogin": @NO,
@@ -427,14 +451,26 @@
 }
 
 
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+
+    [GBVersionTracking track];
+
+    if ([GBVersionTracking isFirstLaunchEver]) {
+        self.visibility |= kPrefsWindowVisibilityUser;
+        [self showPrefsWindow:self];
+    }
+    else
+        [self setup];
+}
+
+
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
 
-    // Don't show the preferences window twice.
-    if (flag)
-        return NO;
+    if (!flag)
+        [self.prefsWindowController.contentViewController transitionToPreferencesViewController:self];
 
-    [self.prefsWindowController.window center];
-    [self.prefsWindowController.window makeKeyAndOrderFront:self];
+    self.visibility |= kPrefsWindowVisibilityUser;
+    [self showPrefsWindow:self];
 
     return NO;
 }

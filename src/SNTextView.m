@@ -28,6 +28,10 @@
 - (NSSize)intrinsicContentSize {
     self.textContainer.size = self.maxSize;
     [self.layoutManager ensureLayoutForTextContainer:self.textContainer];
+
+    //NSSize size = [self.layoutManager usedRectForTextContainer:self.textContainer].size;
+    //NSLog(@"intrinsicContentSize returning {%f, %f} (%@)", size.width, size.height, [self.string substringToIndex:8]);
+
     return [self.layoutManager usedRectForTextContainer:self.textContainer].size;
 }
 
