@@ -36,9 +36,6 @@
 @property(readonly) NSWindowController *windowController;
 @property(readonly) SNWindowTracker *windowTracker;
 @property(readonly) NSWindowController *prefsWindowController;
-@property(readonly) NSAlert *accessibilityAlert;
-@property int32_t accessibilityAlertIsHidden;
-@property BOOL walkthroughIsInProgress;
 
 @property NSUInteger visibility;
 
@@ -64,13 +61,6 @@
 - (instancetype)init {
 
     if ((self = [super init])) {
-
-        _accessibilityAlert = [[NSAlert alloc] init];
-        _accessibilityAlert.alertStyle = NSInformationalAlertStyle;
-        _accessibilityAlert.messageText = @"Enable Accessibility Features";
-        _accessibilityAlert.informativeText = @"Snapp requires accessibility features. Please go to System Preferences > Security & Privacy > Accessibility to enable these features, then click OK.";
-
-        _accessibilityAlertIsHidden = YES;
 
         _storedWindowSizes = [[NSMutableDictionary alloc] init];
         _windowTracker = [[SNWindowTracker alloc] init];
@@ -141,7 +131,6 @@
     [_windowController release];
     [_storedWindowSizes release];
     [_prefsWindowController release];
-    [_accessibilityAlert release];
     [super dealloc];
 }
 
@@ -377,42 +366,42 @@
 }
 
 
-- (void)checkForAccessibilityAPI:(id)object {
-
-    NSLog(@"trusted? %@!", AXIsProcessTrusted() ? @"YES" : @"NO");
+- (void)checkForAccessibilityAPI {
 
     // If Snapp isn't a trusted process and the alert isn't shown already, show
     // it.
-    if (!AXIsProcessTrusted() && OSAtomicCompareAndSwap32(YES, NO, &_accessibilityAlertIsHidden)) {
-        [self.prefsWindowController.contentViewController
-            performSelectorOnMainThread:@selector(transitionToAccessibilityViewController:)
-                             withObject:nil
-                          waitUntilDone:NO];
-        [SNAppDelegate openAccessibilityPreferences];
+    if (!AXIsProcessTrusted() && (self.visibility & kPrefsWindowVisibilityAccessibility) == 0) {
 
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            self.visibility |= kPrefsWindowVisibilityAccessibility;
+        self.visibility |= kPrefsWindowVisibilityAccessibility;
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.prefsWindowController.contentViewController transitionToAccessibilityViewController:self];
             [self showPrefsWindow:self];
         });
+
+        [SNAppDelegate openAccessibilityPreferences];
     }
     // If Snapp is a trusted process and the alert is shown, hide it.
-    else if (AXIsProcessTrusted() && OSAtomicCompareAndSwap32(NO, YES, &_accessibilityAlertIsHidden)) {
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            self.visibility &= ~kPrefsWindowVisibilityAccessibility;
-            if (!self.visibility)
+    else if (AXIsProcessTrusted() && (self.visibility & kPrefsWindowVisibilityAccessibility) != 0) {
+
+        self.visibility &= ~kPrefsWindowVisibilityAccessibility;
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (self.visibility == 0)
                 [self hidePrefsWindow:self];
+            [self.prefsWindowController.contentViewController transitionToPreferencesViewController:self];
         });
-        [self.prefsWindowController.contentViewController
-            performSelectorOnMainThread:@selector(transitionToPreferencesViewController:)
-                             withObject:nil
-                          waitUntilDone:NO];
     }
 
     // Continuously recheck the trust status. If the process is trusted, it is
     // safe to recheck every 10 seconds. If the process is not trusted, recheck
     // every 0.1 seconds to quickly detect when the alert can be hidden.
-    [NSThread sleepForTimeInterval:(AXIsProcessTrusted() ? 10 : 0.1)];
-    [self checkForAccessibilityAPI:object];
+
+    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW,
+                                          (AXIsProcessTrusted() ? 10 : 0.1) * NSEC_PER_SEC);
+    dispatch_after(delay, dispatch_get_current_queue(), ^{
+        [self checkForAccessibilityAPI];
+    });
 }
 
 
@@ -423,9 +412,11 @@
                                                                 @"playSnapSound": @YES,
                                                               @"checkForUpdates": @YES}];
 
-    [NSThread detachNewThreadSelector:@selector(checkForAccessibilityAPI:)
-                             toTarget:self
-                           withObject:nil];
+
+    // Start checking for the Accessibility APIs on a background queue.
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self checkForAccessibilityAPI];
+    });
 
     self.windowTracker.delegate = self;
 

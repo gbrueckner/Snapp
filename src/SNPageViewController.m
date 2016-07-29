@@ -109,8 +109,6 @@
 
 - (void)transitionToViewController:(NSViewController *)viewController animate:(BOOL)animate {
 
-    NSLog(@"transitionToViewController:animate:%@", animate ? @"YES": @"NO");
-
     NSUInteger indexOfToViewController = [self.childViewControllers indexOfObject:viewController];
 
     if (indexOfToViewController == self.indexOfCurrentViewController)
