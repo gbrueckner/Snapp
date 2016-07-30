@@ -81,17 +81,7 @@
 
         CAShapeLayer *layer = [CAShapeLayer layer];
         layer.fillColor = [NSColor colorWithWhite:0.5 alpha:0.15].CGColor;
-        layer.lineDashPattern = @[@15, @5];
-        layer.lineWidth = 6;
-        layer.strokeColor = [NSColor blackColor].CGColor;
-
-        CAShapeLayer *yellowLayer = [CAShapeLayer layer];
-        yellowLayer.fillColor = nil;
-        yellowLayer.lineDashPattern = @[@12, @8];
-        yellowLayer.lineWidth = 3;
-        yellowLayer.strokeColor = [NSColor yellowColor].CGColor;
-
-        [layer addSublayer:yellowLayer];
+        layer.strokeColor = [NSColor colorWithWhite:0 alpha:1].CGColor;
 
         // Don't use dot syntax here, see #4.
         [window.contentView setLayer:layer];
@@ -252,38 +242,18 @@
         pathRect.size = frame.size;
         pathRect.origin = CGPointZero;
 
-        CGPathRef path = CGPathCreateWithRoundedRect(CGRectInset(pathRect, 4, 4),
-                                                     15,
-                                                     15,
+        CGPathRef path = CGPathCreateWithRect(CGRectInset(pathRect, 2, 2),
                                                      NULL);
 
         // Don't use dot syntax here, see #4.
         CAShapeLayer *layer = (CAShapeLayer *) [self.windowController.window.contentView layer];
-        CAShapeLayer *yellowLayer = (CAShapeLayer *) [layer.sublayers objectAtIndex:0];
 
         layer.path = path;
-        yellowLayer.path = path;
 
         CGPathRelease(path);
 
         [[self.windowController window] setFrame:frame
                                          display:YES];
-
-        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"lineDashPhase"];
-        animation.fromValue = @0;
-        animation.toValue = @20;
-        animation.repeatCount = HUGE_VALF;
-        animation.duration = 0.4;
-
-        [layer addAnimation:animation forKey:nil];
-
-        animation = [CABasicAnimation animationWithKeyPath:@"lineDashPhase"];
-        animation.fromValue = @18.5;
-        animation.toValue = @38.5;
-        animation.repeatCount = HUGE_VALF;
-        animation.duration = 0.4;
-
-        [yellowLayer addAnimation:animation forKey:nil];
 
         [self.windowController.window makeKeyAndOrderFront:nil];
     }
