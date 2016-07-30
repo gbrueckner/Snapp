@@ -140,7 +140,7 @@ CGEventRef mouseEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
     // Use smart snapping, i.e. if this point is in the vicinity of multiple
     // screens, make the hot zones larger.
-    if ([NSScreen screensAtLocation:point withFuzziness:menubarHeight].count > 1) {
+    if ([NSScreen screensWithinDistance:menubarHeight ofLocation:point].count > 1) {
         marginRight = menubarHeight;
         marginBottom = menubarHeight;
         marginLeft = menubarHeight;

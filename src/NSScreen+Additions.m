@@ -20,16 +20,49 @@
 #import "NSScreen+Additions.h"
 
 
+CGFloat NSPointDistanceFromPoint(NSPoint aPoint, NSPoint bPoint) {
+    return hypot(aPoint.x - bPoint.x, aPoint.y - bPoint.y);
+}
+
+
+CGFloat NSPointDistanceFromRect(NSPoint aPoint, NSRect aRect) {
+
+    NSPoint lowerLeftCorner  = NSMakePoint(NSMinX(aRect), NSMinY(aRect));
+    NSPoint lowerRightCorner = NSMakePoint(NSMaxX(aRect), NSMinY(aRect));
+    NSPoint upperLeftCorner  = NSMakePoint(NSMinX(aRect), NSMaxY(aRect));
+    NSPoint upperRightCorner = NSMakePoint(NSMaxX(aRect), NSMaxY(aRect));
+
+    if      (aPoint.x < lowerLeftCorner.x  && aPoint.y < lowerLeftCorner.y)
+        return NSPointDistanceFromPoint(aPoint, lowerLeftCorner);
+    else if (aPoint.x > lowerRightCorner.x && aPoint.y < lowerRightCorner.y)
+        return NSPointDistanceFromPoint(aPoint, lowerRightCorner);
+    else if (aPoint.x < upperLeftCorner.x  && aPoint.y > upperLeftCorner.y)
+        return NSPointDistanceFromPoint(aPoint, upperLeftCorner);
+    else if (aPoint.x > upperRightCorner.x && aPoint.y > upperRightCorner.y)
+        return NSPointDistanceFromPoint(aPoint, upperRightCorner);
+
+    else if (aPoint.x < NSMinX(aRect))
+        return NSMinX(aRect) - aPoint.x;
+    else if (aPoint.x > NSMaxX(aRect))
+        return aPoint.x - NSMaxX(aRect);
+    else if (aPoint.y < NSMinY(aRect))
+        return NSMinY(aRect) - aPoint.y;
+    else if (aPoint.y > NSMaxY(aRect))
+        return aPoint.y - NSMaxY(aRect);
+
+    return 0;
+}
+
+
 @implementation NSScreen (NSScreenAdditions)
 
 
-+ (NSArray *)screensAtLocation:(CGPoint)location withFuzziness:(CGFloat)fuzziness {
++ (NSArray *)screensWithinDistance:(CGFloat)distance ofLocation:(NSPoint)aPoint {
 
     NSMutableArray *screens = [NSMutableArray array];
 
     for (NSScreen *screen in [NSScreen screens]) {
-        NSRect frame = NSInsetRect(screen.frame, -fuzziness, -fuzziness);
-        if (NSMouseInRect(location, frame, NO))
+        if (NSPointDistanceFromRect(aPoint, screen.frame) <= distance)
             [screens addObject:screen];
     }
 
@@ -37,19 +70,31 @@
 }
 
 
-+ (NSScreen *)screenAtLocation:(CGPoint)location {
++ (NSScreen *)screenAtLocation:(NSPoint)location {
 
-    NSArray *screens = [NSScreen screensAtLocation:location
-                                     withFuzziness:1];
+    NSScreen *closestScreen = [NSScreen mainScreen];
+    CGFloat minimumDistance = CGFLOAT_MAX;
 
-    return (screens.count == 1) ? screens.firstObject : nil;
+    for (NSScreen *screen in [NSScreen screens]) {
+
+        CGFloat distance = NSPointDistanceFromRect(location, screen.frame);
+
+        if (distance == 0)
+            return screen;
+        else if (distance < minimumDistance) {
+            closestScreen = screen;
+            minimumDistance = distance;
+        }
+    }
+
+    return closestScreen;
 }
 
 
 + (NSScreen *)screenAtZeroLocation {
     // NSZeroPoint doesn't work here because NSMouseInRect doesn't count the
     // lower screen border as belonging to the screen.
-    return [NSScreen screenAtLocation:NSMakePoint(0, DBL_MIN)];
+    return [NSScreen screenAtLocation:NSZeroPoint];
 }
 
 

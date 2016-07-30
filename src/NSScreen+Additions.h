@@ -22,11 +22,7 @@
 
 @interface NSScreen (NSScreenAdditions)
 
-// This method returns an array of screens so that the given location has a
-// rectilinear distance of at most fuzziness from some location within the
-// screen's frame.
-+ (NSArray *)screensAtLocation:(NSPoint)location withFuzziness:(CGFloat)fuzziness;
-
++ (NSArray *)screensWithinDistance:(CGFloat)distance ofLocation:(NSPoint)aPoint;
 + (NSScreen *)screenAtLocation:(NSPoint)location;
 + (NSScreen *)screenAtZeroLocation;
 - (NSNumber *)screenNumber;
