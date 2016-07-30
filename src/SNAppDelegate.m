@@ -396,7 +396,6 @@
     // Continuously recheck the trust status. If the process is trusted, it is
     // safe to recheck every 10 seconds. If the process is not trusted, recheck
     // every 0.1 seconds to quickly detect when the alert can be hidden.
-
     dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW,
                                           (AXIsProcessTrusted() ? 10 : 0.1) * NSEC_PER_SEC);
     dispatch_after(delay, dispatch_get_current_queue(), ^{
