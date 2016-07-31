@@ -25,5 +25,7 @@
 
 + (NSURL *)repositoryURL;
 + (void)openAccessibilityPreferences;
+- (void)userWantsUpdate:(BOOL)wantsUpdate;
+- (void)setup;
 
 @end

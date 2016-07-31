@@ -32,11 +32,11 @@
 
 @interface SNAppDelegate ()
 
-@property(readonly) NSMutableDictionary *storedWindowSizes;
-@property(readonly) NSWindowController *windowController;
 @property(readonly) SNWindowTracker *windowTracker;
-@property(readonly) NSWindowController *prefsWindowController;
-
+@property(readonly) NSMutableDictionary *storedWindowSizes;
+@property(readonly) NSWindowController *borderWindowController;
+@property(readonly) NSWindowController *mainWindowController;
+@property(readonly) SNViewController *mainViewController;
 @property NSUInteger visibility;
 
 @end
@@ -75,7 +75,7 @@
         window.opaque = NO;
         window.hidesOnDeactivate = NO;
 
-        _windowController = [[NSWindowController alloc] initWithWindow:window];
+        _borderWindowController = [[NSWindowController alloc] initWithWindow:window];
 
         [window release];
 
@@ -111,15 +111,15 @@
         [prefsWindow setAnchorAttribute:NSLayoutAttributeCenterX
                      forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-        _prefsWindowController = [[NSWindowController alloc] initWithWindow:prefsWindow];
+        _mainWindowController = [[NSWindowController alloc] initWithWindow:prefsWindow];
 
-        NSViewController *prefsViewController = [[SNViewController alloc] initWithNibName:nil
-                                                                                   bundle:nil];
+        _mainViewController = [[SNViewController alloc] initWithNibName:nil
+                                                                 bundle:nil];
 
-        _prefsWindowController.contentViewController = prefsViewController;
+        _mainWindowController.contentViewController = _mainViewController;
 
         [prefsWindow release];
-        [prefsViewController release];
+        [_mainViewController release];
     }
 
     return self;
@@ -128,9 +128,9 @@
 
 - (void)dealloc {
     [_windowTracker release];
-    [_windowController release];
+    [_borderWindowController release];
     [_storedWindowSizes release];
-    [_prefsWindowController release];
+    [_mainWindowController release];
     [super dealloc];
 }
 
@@ -229,7 +229,7 @@
 
     if (hotZone == kSNHotZoneNone) {
 
-        [self.windowController close];
+        [self.borderWindowController close];
 
         NSValue *sizeValue = [self.storedWindowSizes objectForKey:[NSNumber numberWithUnsignedInt:window.windowID]];
         if (sizeValue != nil) {
@@ -258,7 +258,7 @@
                                                      NULL);
 
         // Don't use dot syntax here, see #4.
-        CAShapeLayer *layer = (CAShapeLayer *) [self.windowController.window.contentView layer];
+        CAShapeLayer *layer = (CAShapeLayer *) [self.borderWindowController.window.contentView layer];
         CAShapeLayer *yellowLayer = (CAShapeLayer *) [layer.sublayers objectAtIndex:0];
 
         layer.path = path;
@@ -266,7 +266,7 @@
 
         CGPathRelease(path);
 
-        [[self.windowController window] setFrame:frame
+        [[self.borderWindowController window] setFrame:frame
                                          display:YES];
 
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"lineDashPhase"];
@@ -285,7 +285,7 @@
 
         [yellowLayer addAnimation:animation forKey:nil];
 
-        [self.windowController.window makeKeyAndOrderFront:nil];
+        [self.borderWindowController.window makeKeyAndOrderFront:nil];
     }
 }
 
@@ -314,7 +314,7 @@
         [[NSSound soundNamed:@"Pop"] play];
 
     // Hide the border indicator.
-    [self.windowController close];
+    [self.borderWindowController close];
 }
 
 
@@ -337,9 +337,22 @@
 
     if ([newestVersion compare:currentVersion options:NSNumericSearch] == NSOrderedDescending) {
         self.visibility |= kPrefsWindowVisibilityUpdate;
-        [self.prefsWindowController.contentViewController transitionToUpdateViewController:self];
+        [self.mainViewController transitionToUpdateViewController:self];
         [self showPrefsWindow:self];
     }
+}
+
+
+- (void)userWantsUpdate:(BOOL)wantsUpdate {
+
+    if (wantsUpdate)
+        [[NSWorkspace sharedWorkspace] openURL:[SNAppDelegate repositoryURL]];
+
+    self.visibility &= ~kPrefsWindowVisibilityUpdate;
+    if (self.visibility == 0)
+        [self hidePrefsWindow:self];
+
+    [self.mainViewController transitionToPreferencesViewController:self];
 }
 
 
@@ -353,16 +366,16 @@
 }
 
 
-- (void)showPrefsWindow:(id) sender {
-    if (!self.prefsWindowController.window.visible)
-        [self.prefsWindowController.window center];
-    [self.prefsWindowController.window makeKeyAndOrderFront:self];
+- (void)showPrefsWindow:(id)sender {
+    if (!self.mainWindowController.window.visible)
+        [self.mainWindowController.window center];
+    [self.mainWindowController.window makeKeyAndOrderFront:self];
 }
 
 
 - (void)hidePrefsWindow:(id)sender {
     self.visibility = 0;
-    [self.prefsWindowController.window orderOut:self];
+    [self.mainWindowController.window orderOut:self];
 }
 
 
@@ -375,7 +388,7 @@
         self.visibility |= kPrefsWindowVisibilityAccessibility;
 
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.prefsWindowController.contentViewController transitionToAccessibilityViewController:self];
+            [self.mainViewController transitionToAccessibilityViewController:self];
             [self showPrefsWindow:self];
         });
 
@@ -389,7 +402,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             if (self.visibility == 0)
                 [self hidePrefsWindow:self];
-            [self.prefsWindowController.contentViewController transitionToPreferencesViewController:self];
+            [self.mainViewController transitionToPreferencesViewController:self];
         });
     }
 
@@ -398,7 +411,7 @@
     // every 0.1 seconds to quickly detect when the alert can be hidden.
     dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW,
                                           (AXIsProcessTrusted() ? 10 : 0.1) * NSEC_PER_SEC);
-    dispatch_after(delay, dispatch_get_current_queue(), ^{
+    dispatch_after(delay, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [self checkForAccessibilityAPI];
     });
 }
@@ -456,7 +469,7 @@
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
 
     if (!flag)
-        [self.prefsWindowController.contentViewController transitionToPreferencesViewController:self];
+        [self.mainViewController transitionToPreferencesViewController:self];
 
     self.visibility |= kPrefsWindowVisibilityUser;
     [self showPrefsWindow:self];

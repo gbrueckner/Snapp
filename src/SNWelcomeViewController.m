@@ -18,6 +18,7 @@
 
 
 #import "SNWelcomeViewController.h"
+#import "SNAppDelegate.h"
 #import "SNTextView.h"
 #import "SNView.h"
 
@@ -91,7 +92,7 @@
 
 
 - (void)okButtonClicked:(id)sender {
-    [NSApp.delegate setup];
+    [(SNAppDelegate *)(NSApp.delegate) setup];
 }
 
 

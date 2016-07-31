@@ -25,7 +25,7 @@
 
 @interface SNUpdateViewController ()
 
-@property(assign) NSButton *yesButton;
+@property NSButton *yesButton;
 
 @end
 
@@ -116,9 +116,7 @@
 
 
 - (void)buttonClicked:(id)sender {
-    [NSApp.delegate shouldUpdate:[sender isEqual:self.yesButton]];
-    //[[NSWorkspace sharedWorkspace] openURL:[SNAppDelegate repositoryURL]];
-    //[self.mainViewController transitionToPreferencesViewController:self];
+    [(SNAppDelegate *)(NSApp.delegate) userWantsUpdate:[sender isEqual:self.yesButton]];
 }
 
 
