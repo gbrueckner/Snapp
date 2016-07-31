@@ -430,9 +430,6 @@
                                                                     object:self
                                                                   userInfo:@{NSWorkspaceApplicationKey: [NSWorkspace sharedWorkspace].frontmostApplication}];
 
-    // Unhide the app. Otherwise, the indicator window might not be shown.
-    [NSApp unhide];
-
     // Check for updates once a day.
     NSTimer *checkForUpdatesTimer = [[NSTimer alloc] initWithFireDate:[NSDate date]
                                                              interval:86400
@@ -460,6 +457,7 @@
     if ([GBVersionTracking isFirstLaunchEver]) {
         self.visibility |= kPrefsWindowVisibilityUser;
         [self showPrefsWindow:self];
+        [NSApp activateIgnoringOtherApps:YES];
     }
     else
         [self setup];

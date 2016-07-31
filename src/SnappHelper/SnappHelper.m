@@ -24,8 +24,15 @@ int main(int argc, const char *argv[]) {
 
     @autoreleasepool {
         NSArray *snappInstances = [NSRunningApplication runningApplicationsWithBundleIdentifier:@"Snapp"];
-        if ([snappInstances count] == 0)
-            [[NSWorkspace sharedWorkspace] launchApplication:@"/Applications/Snapp.app"];
+        if ([snappInstances count] == 0) {
+
+            NSURL *snappURL = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:@"Snapp"];
+
+            [[NSWorkspace sharedWorkspace] launchApplicationAtURL:snappURL
+                                                          options:NSWorkspaceLaunchWithoutActivation
+                                                    configuration:@{}
+                                                            error:NULL];
+        }
     }
 
     return EXIT_SUCCESS;
