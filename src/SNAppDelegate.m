@@ -18,13 +18,14 @@
 
 
 #import "SNAppDelegate.h"
+@import QuartzCore;
+#import <GBVersionTracking/GBVersionTracking.h>
 #import "AXUIElement+Additions.h"
+#import "NSAppleScript+Additions.h"
 #import "NSAttributedString+Hyperlink.h"
 #import "NSScreen+Additions.h"
-#import "SNViewController.h"
 #import "SNPageViewController.h"
-#import <GBVersionTracking/GBVersionTracking.h>
-@import QuartzCore;
+#import "SNViewController.h"
 
 
 #pragma mark - SNAppDelegate private interface
@@ -356,16 +357,6 @@
 }
 
 
-+ (void)openAccessibilityPreferences {
-    NSURL *scriptURL = [[NSBundle mainBundle] URLForResource:@"OpenAccessibilityPreferences"
-                                               withExtension:@"scpt"];
-    NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:scriptURL
-                                                                   error:NULL];
-    [script executeAndReturnError:NULL];
-    [script release];
-}
-
-
 - (void)showPrefsWindow:(id)sender {
     if (!self.mainWindowController.window.visible)
         [self.mainWindowController.window center];
@@ -392,7 +383,7 @@
             [self showPrefsWindow:self];
         });
 
-        [SNAppDelegate openAccessibilityPreferences];
+        [NSAppleScript executeBundledScriptWithName:@"OpenAccessibilityPreferencesInBackground"];
     }
     // If Snapp is a trusted process and the alert is shown, hide it.
     else if (AXIsProcessTrusted() && (self.visibility & kPrefsWindowVisibilityAccessibility) != 0) {

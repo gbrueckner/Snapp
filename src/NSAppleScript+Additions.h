@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -18,13 +18,10 @@
 
 
 @import AppKit;
-#import "SNWindowTracker.h"
 
 
-@interface SNAppDelegate : NSObject <NSApplicationDelegate, SNWindowTrackerDelegate>
+@interface NSAppleScript (NSAppleScriptAdditions)
 
-+ (NSURL *)repositoryURL;
-- (void)userWantsUpdate:(BOOL)wantsUpdate;
-- (void)setup;
++ (void)executeBundledScriptWithName:(NSString *)scriptName;
 
 @end

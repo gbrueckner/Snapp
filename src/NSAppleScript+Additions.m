@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -17,14 +17,20 @@
  */
 
 
-@import AppKit;
-#import "SNWindowTracker.h"
+#import "NSAppleScript+Additions.h"
 
 
-@interface SNAppDelegate : NSObject <NSApplicationDelegate, SNWindowTrackerDelegate>
+@implementation NSAppleScript (NSAppleScriptAdditions)
 
-+ (NSURL *)repositoryURL;
-- (void)userWantsUpdate:(BOOL)wantsUpdate;
-- (void)setup;
+
++ (void)executeBundledScriptWithName:(NSString *)scriptName {
+     NSURL *scriptURL = [[NSBundle mainBundle] URLForResource:scriptName
+                                                withExtension:@"scpt"];
+     NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:scriptURL
+                                                                    error:NULL];
+     [script executeAndReturnError:NULL];
+     [script release];
+}
+
 
 @end

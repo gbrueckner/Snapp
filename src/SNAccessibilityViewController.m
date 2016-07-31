@@ -18,9 +18,10 @@
 
 
 #import "SNAccessibilityViewController.h"
+#import "NSAppleScript+Additions.h"
+#import "SNAppDelegate.h"
 #import "SNTextView.h"
 #import "SNView.h"
-#import "SNAppDelegate.h"
 
 
 @implementation SNAccessibilityViewController
@@ -81,7 +82,9 @@
 
 
 - (void)openButtonClicked:(id)sender {
-    [SNAppDelegate openAccessibilityPreferences];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [NSAppleScript executeBundledScriptWithName:@"OpenAccessibilityPreferences"];
+    });
 }
 
 

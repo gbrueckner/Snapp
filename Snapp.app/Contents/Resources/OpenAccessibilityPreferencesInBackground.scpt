@@ -19,5 +19,10 @@
 tell application "System Preferences"
     set securityPane to pane id "com.apple.preference.security"
     tell securityPane to reveal anchor "Privacy_Accessibility"
-    activate
+    launch
+end tell
+tell application "System Events"
+    tell process "System Preferences"
+        set visible to true
+    end tell
 end tell
