@@ -406,12 +406,6 @@
 
 - (void)setup {
 
-    // Set default user defaults.
-    [[NSUserDefaults standardUserDefaults] registerDefaults:@{    @"openAtLogin": @NO,
-                                                                @"playSnapSound": @YES,
-                                                              @"checkForUpdates": @YES}];
-
-
     // Start checking for the Accessibility APIs on a background queue.
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [self checkForAccessibilityAPI];
@@ -444,6 +438,11 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 
     [GBVersionTracking track];
+
+    // Set default user defaults.
+    [[NSUserDefaults standardUserDefaults] registerDefaults:@{    @"openAtLogin": @NO,
+                                                                @"playSnapSound": @YES,
+                                                              @"checkForUpdates": @YES}];
 
     if ([GBVersionTracking isFirstLaunchEver]) {
         self.visibility |= kPrefsWindowVisibilityUser;

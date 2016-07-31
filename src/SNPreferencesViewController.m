@@ -26,6 +26,15 @@
 @import ServiceManagement;
 
 
+@interface SNPreferencesViewController ()
+
+@property NSButton *loginCheckbox;
+@property NSButton *playSoundCheckbox;
+@property NSButton *updateCheckbox;
+
+@end
+
+
 @implementation SNPreferencesViewController
 
 
@@ -48,34 +57,31 @@
     [infoLabel release];
 
     // Create the login checkbox.
-    NSButton *loginCheckbox = [[NSButton alloc] initWithFrame:NSZeroRect];
-    loginCheckbox.title = @"Open Snapp automatically when you log in";
-    loginCheckbox.buttonType = NSSwitchButton;
-    loginCheckbox.state = [[NSUserDefaults standardUserDefaults] boolForKey:@"openAtLogin"] ? NSOnState : NSOffState;
-    loginCheckbox.target = self;
-    loginCheckbox.action = @selector(loginCheckboxClicked:);
-    [self.view addSubview:loginCheckbox];
-    [loginCheckbox release];
+    self.loginCheckbox = [[NSButton alloc] initWithFrame:NSZeroRect];
+    self.loginCheckbox.title = @"Open Snapp automatically when you log in";
+    self.loginCheckbox.buttonType = NSSwitchButton;
+    self.loginCheckbox.target = self;
+    self.loginCheckbox.action = @selector(loginCheckboxClicked:);
+    [self.view addSubview:self.loginCheckbox];
+    [self.loginCheckbox release];
 
     // Create the sound checkbox.
-    NSButton *playSoundCheckbox = [[NSButton alloc] initWithFrame:NSZeroRect];
-    playSoundCheckbox.title = @"Play a sound when snapping windows";
-    playSoundCheckbox.buttonType = NSSwitchButton;
-    playSoundCheckbox.state = [[NSUserDefaults standardUserDefaults] boolForKey:@"playSnapSound"] ? NSOnState : NSOffState;
-    playSoundCheckbox.target = self;
-    playSoundCheckbox.action = @selector(playSoundCheckboxClicked:);
-    [self.view addSubview:playSoundCheckbox];
-    [playSoundCheckbox release];
+    self.playSoundCheckbox = [[NSButton alloc] initWithFrame:NSZeroRect];
+    self.playSoundCheckbox.title = @"Play a sound when snapping windows";
+    self.playSoundCheckbox.buttonType = NSSwitchButton;
+    self.playSoundCheckbox.target = self;
+    self.playSoundCheckbox.action = @selector(playSoundCheckboxClicked:);
+    [self.view addSubview:self.playSoundCheckbox];
+    [self.playSoundCheckbox release];
 
     // Create the update checkbox.
-    NSButton *updateCheckbox = [[NSButton alloc] initWithFrame:NSZeroRect];
-    updateCheckbox.title = @"Check for updates automatically";
-    updateCheckbox.buttonType = NSSwitchButton;
-    updateCheckbox.state = [[NSUserDefaults standardUserDefaults] boolForKey:@"checkForUpdates"] ? NSOnState : NSOffState;
-    updateCheckbox.target = self;
-    updateCheckbox.action = @selector(updateCheckboxClicked:);
-    [self.view addSubview:updateCheckbox];
-    [updateCheckbox release];
+    self.updateCheckbox = [[NSButton alloc] initWithFrame:NSZeroRect];
+    self.updateCheckbox.title = @"Check for updates automatically";
+    self.updateCheckbox.buttonType = NSSwitchButton;
+    self.updateCheckbox.target = self;
+    self.updateCheckbox.action = @selector(updateCheckboxClicked:);
+    [self.view addSubview:self.updateCheckbox];
+    [self.updateCheckbox release];
 
     // Create the quit button.
     NSButton *quitButton = [[NSButton alloc] initWithFrame:NSZeroRect];
@@ -110,9 +116,9 @@
 
     // Layout the subviews.
     NSDictionary *views = @{@"infoLabel": infoLabel,
-                        @"loginCheckbox": loginCheckbox,
-                    @"playSoundCheckbox": playSoundCheckbox,
-                       @"updateCheckbox": updateCheckbox,
+                        @"loginCheckbox": self.loginCheckbox,
+                    @"playSoundCheckbox": self.playSoundCheckbox,
+                       @"updateCheckbox": self.updateCheckbox,
                            @"quitButton": quitButton,
                              @"ossLabel": ossLabel};
 
@@ -163,22 +169,29 @@
                                                   views:views]];
 
     [self.view addConstraint:
-        [NSLayoutConstraint constraintWithItem:loginCheckbox
+        [NSLayoutConstraint constraintWithItem:self.loginCheckbox
                                      attribute:NSLayoutAttributeLeft
                                      relatedBy:NSLayoutRelationEqual
-                                        toItem:playSoundCheckbox
+                                        toItem:self.playSoundCheckbox
                                      attribute:NSLayoutAttributeLeft
                                     multiplier:1
                                       constant:0]];
 
     [self.view addConstraint:
-        [NSLayoutConstraint constraintWithItem:playSoundCheckbox
+        [NSLayoutConstraint constraintWithItem:self.playSoundCheckbox
                                      attribute:NSLayoutAttributeLeft
                                      relatedBy:NSLayoutRelationEqual
-                                        toItem:updateCheckbox
+                                        toItem:self.updateCheckbox
                                      attribute:NSLayoutAttributeLeft
                                     multiplier:1
                                       constant:0]];
+}
+
+
+- (void)viewWillAppear {
+    self.loginCheckbox.state     = [[NSUserDefaults standardUserDefaults] boolForKey:@"openAtLogin"]     ? NSOnState : NSOffState;
+    self.playSoundCheckbox.state = [[NSUserDefaults standardUserDefaults] boolForKey:@"playSnapSound"]   ? NSOnState : NSOffState;
+    self.updateCheckbox.state    = [[NSUserDefaults standardUserDefaults] boolForKey:@"checkForUpdates"] ? NSOnState : NSOffState;
 }
 
 
