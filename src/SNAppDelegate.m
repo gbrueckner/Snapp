@@ -381,6 +381,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.mainViewController transitionToAccessibilityViewController:self];
             [self showPrefsWindow:self];
+            [NSApp activateIgnoringOtherApps:YES];
         });
 
         [NSAppleScript executeBundledScriptWithName:@"OpenAccessibilityPreferencesInBackground"];

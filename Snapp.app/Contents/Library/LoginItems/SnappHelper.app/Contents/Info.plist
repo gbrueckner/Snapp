@@ -5,7 +5,7 @@
 	<key>CFBundleExecutable</key>
 	<string>SnappHelper</string>
 	<key>CFBundleIdentifier</key>
-	<string>SnappHelper</string>
+	<string>com.brueckner.SnappHelper</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

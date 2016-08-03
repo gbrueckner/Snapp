@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string>Snapp.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>Snapp</string>
+	<string>com.brueckner.Snapp</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

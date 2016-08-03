@@ -23,10 +23,13 @@
 int main(int argc, const char *argv[]) {
 
     @autoreleasepool {
-        NSArray *snappInstances = [NSRunningApplication runningApplicationsWithBundleIdentifier:@"Snapp"];
+
+        NSString *snappBundleIdentifier = @"com.brueckner.Snapp";
+
+        NSArray *snappInstances = [NSRunningApplication runningApplicationsWithBundleIdentifier:snappBundleIdentifier];
         if ([snappInstances count] == 0) {
 
-            NSURL *snappURL = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:@"Snapp"];
+            NSURL *snappURL = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:snappBundleIdentifier];
 
             [[NSWorkspace sharedWorkspace] launchApplicationAtURL:snappURL
                                                           options:NSWorkspaceLaunchWithoutActivation
