@@ -80,7 +80,9 @@
     self.updateCheckbox.buttonType = NSSwitchButton;
     self.updateCheckbox.target = self;
     self.updateCheckbox.action = @selector(updateCheckboxClicked:);
+#ifndef APP_STORE
     [self.view addSubview:self.updateCheckbox];
+#endif
     [self.updateCheckbox release];
 
     // Create the quit button.
@@ -126,11 +128,18 @@
         view.translatesAutoresizingMaskIntoConstraints = NO;
     }];
 
-    [self.view addConstraints:
-        [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[infoLabel]-18-[loginCheckbox]-[playSoundCheckbox]-[updateCheckbox]-[quitButton]-[ossLabel]-8-|"
-                                                options:NSLayoutFormatAlignAllCenterX
-                                                metrics:nil
-                                                  views:views]];
+    {
+#ifndef APP_STORE
+        NSString *format = @"V:|[infoLabel]-18-[loginCheckbox]-[playSoundCheckbox]-[updateCheckbox]-[quitButton]-[ossLabel]-8-|";
+#else
+        NSString *format = @"V:|[infoLabel]-18-[loginCheckbox]-[playSoundCheckbox]-[quitButton]-[ossLabel]-8-|";
+#endif
+        [self.view addConstraints:
+            [NSLayoutConstraint constraintsWithVisualFormat:format
+                                                    options:NSLayoutFormatAlignAllCenterX
+                                                    metrics:nil
+                                                      views:views]];
+    }
 
     [self.view addConstraints:
         [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[infoLabel]|"
@@ -156,11 +165,13 @@
                                                 metrics:nil
                                                   views:views]];
 
+#ifndef APP_STORE
     [self.view addConstraints:
         [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=0-[updateCheckbox]->=0-|"
                                                 options:0
                                                 metrics:nil
                                                   views:views]];
+#endif
 
     [self.view addConstraints:
         [NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=0-[quitButton]->=0-|"
@@ -177,6 +188,7 @@
                                     multiplier:1
                                       constant:0]];
 
+#ifndef APP_STORE
     [self.view addConstraint:
         [NSLayoutConstraint constraintWithItem:self.playSoundCheckbox
                                      attribute:NSLayoutAttributeLeft
@@ -185,6 +197,7 @@
                                      attribute:NSLayoutAttributeLeft
                                     multiplier:1
                                       constant:0]];
+#endif
 }
 
 
@@ -197,7 +210,7 @@
 
 - (void)loginCheckboxClicked:(NSButton *)loginCheckbox {
 
-    if (SMLoginItemSetEnabled(CFSTR("SnappHelper"),
+    if (SMLoginItemSetEnabled(CFSTR("com.brueckner.SnappHelper"),
                                loginCheckbox.state == NSOnState ? TRUE : FALSE)) {
          [[NSUserDefaults standardUserDefaults] setBool:(loginCheckbox.state == NSOnState)
                                                  forKey:@"openAtLogin"];

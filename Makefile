@@ -19,11 +19,10 @@ clean:
 
 .PHONY: install
 install:
-	cp -r Snapp.app /Applications/
+	sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db "INSERT or REPLACE INTO access VALUES('kTCCServiceAccessibility','com.brueckner.Snapp',0,1,1,NULL,NULL);"
 
 .PHONY: uninstall
 uninstall:
 	osascript -e 'quit app "Snapp"'
-	rm -rf /Applications/Snapp.app/
-	defaults delete Snapp
-	sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db "delete from access where client='Snapp';"
+	defaults delete com.brueckner.Snapp
+	sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db "delete from access where client='com.brueckner.Snapp';"

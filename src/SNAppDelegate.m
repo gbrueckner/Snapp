@@ -411,6 +411,9 @@
 
 - (void)setup {
 
+    if (AXIsProcessTrusted())
+        [self hidePrefsWindow:self];
+
     // Start checking for the Accessibility APIs on a background queue.
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [self checkForAccessibilityAPI];
@@ -422,7 +425,8 @@
                                                                     object:self
                                                                   userInfo:@{NSWorkspaceApplicationKey: [NSWorkspace sharedWorkspace].frontmostApplication}];
 
-    // Check for updates once a day.
+    // Check for updates once a day (GitHub version only).
+#ifndef APP_STORE
     NSTimer *checkForUpdatesTimer = [[NSTimer alloc] initWithFireDate:[NSDate date]
                                                              interval:86400
                                                                target:self
@@ -434,6 +438,7 @@
                                  forMode:NSDefaultRunLoopMode];
 
     [checkForUpdatesTimer release];
+#endif
 }
 
 
