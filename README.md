@@ -12,17 +12,19 @@ Drag a window up to the menubar to maximize it, or drag a window to the side to 
 
 ### Compatibility
 
-Snapp is developed on OS X El Capitan.
-It has been [reported](https://github.com/gbrueckner/Snapp/pull/5) to run on OS X Yosemite as well.
+Snapp is developed on macOS Sierra and is not supported for older versions of macOS.
 
 ## Installation
 
-Upon cloning the Snapp repository, run `make` to compile it.
-To install it, run `make install`.
+Clone the Snapp repository recursively:
+```
+git clone --recursive https://github.com/gbrueckner/Snapp.git
+```
+
+Then, run `make` to compile it.
 To open Snapp at login, click the checkbox in Snapp's preferences window.
-To uninstall, run `make uninstall`.
 
 ## License
 
-Copyright 2015 gbrueckner.
+Copyright 2015-2016 gbrueckner.
 Snapp is released under the terms of the GNU General Public License version 3.

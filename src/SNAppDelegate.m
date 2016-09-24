@@ -67,7 +67,7 @@
         _windowTracker = [[SNWindowTracker alloc] init];
 
         NSWindow *window = [[NSWindow alloc] initWithContentRect:NSZeroRect
-                                                       styleMask:NSBorderlessWindowMask
+                                                       styleMask:NSWindowStyleMaskBorderless
                                                          backing:NSBackingStoreBuffered
                                                            defer:YES];
         window.backgroundColor = [NSColor clearColor];
@@ -100,7 +100,7 @@
 
         // Create the preferences window controller.
         NSWindow *prefsWindow = [[NSWindow alloc] initWithContentRect:NSZeroRect
-                                                            styleMask:(NSTitledWindowMask | NSClosableWindowMask | NSFullSizeContentViewWindowMask)
+                                                            styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskFullSizeContentView)
                                                               backing:NSBackingStoreBuffered
                                                                 defer:NO];
         prefsWindow.title = @"Snapp";

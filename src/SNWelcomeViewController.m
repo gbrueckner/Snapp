@@ -33,7 +33,7 @@
 
     NSTextView *welcomeLabel = [[SNTextView alloc] initWithFrame:NSZeroRect];
     welcomeLabel.string = @"Hi there!";
-    welcomeLabel.alignment = NSCenterTextAlignment;
+    welcomeLabel.alignment = NSTextAlignmentCenter;
     welcomeLabel.drawsBackground = NO;
     welcomeLabel.font = [NSFont systemFontOfSize:18];
     welcomeLabel.selectable = NO;

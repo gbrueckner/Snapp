@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2015-2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -46,7 +46,7 @@
     // Create the info label.
     NSTextView *infoLabel = [[SNTextView alloc] initWithFrame:NSZeroRect];
     infoLabel.string = @"Open Snapp twice to show this window.";
-    infoLabel.alignment = NSCenterTextAlignment;
+    infoLabel.alignment = NSTextAlignmentCenter;
     infoLabel.drawsBackground = NO;
     infoLabel.font = [NSFont labelFont];
     infoLabel.selectable = NO;
@@ -92,7 +92,7 @@
     quitButton.target = NSApp;
     quitButton.action = @selector(terminate:);
     quitButton.keyEquivalent = @"q";
-    quitButton.keyEquivalentModifierMask = NSCommandKeyMask;
+    quitButton.keyEquivalentModifierMask = NSEventModifierFlagCommand;
     [self.view addSubview:quitButton];
     [quitButton release];
 
@@ -104,7 +104,7 @@
     NSAttributedString *dotString = [[NSAttributedString alloc] initWithString:@"."];
     [ossLabelString appendAttributedString:dotString];
     ossLabel.textStorage.attributedString = ossLabelString;
-    ossLabel.alignment = NSCenterTextAlignment;
+    ossLabel.alignment = NSTextAlignmentCenter;
     ossLabel.drawsBackground = NO;
     ossLabel.editable = NO;
     ossLabel.font = [NSFont labelFont];
