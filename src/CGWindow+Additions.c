@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2015-2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -18,6 +18,44 @@
 
 
 #include "CGWindow+Additions.h"
+
+
+CGWindowID CGWindowAtPosition(CGPoint position) {
+
+    CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements,
+                                                       kCGNullWindowID);
+    if (windowList == NULL)
+        return kCGNullWindowID;
+
+    CGWindowID windowID = kCGNullWindowID;
+
+    for (CFIndex i = 0; i < CFArrayGetCount(windowList); i++) {
+
+        CFDictionaryRef window = CFArrayGetValueAtIndex(windowList, i);
+
+        int64_t layer;
+        CFNumberGetValue(CFDictionaryGetValue(window, kCGWindowLayer),
+                         kCFNumberSInt64Type,
+                         &layer);
+        if (layer != 0)
+            continue;
+
+        CGRect windowBounds;
+        CGRectMakeWithDictionaryRepresentation(CFDictionaryGetValue(window, kCGWindowBounds),
+                                               &windowBounds);
+
+        if (CGRectContainsPoint(windowBounds, position)) {
+            CFNumberGetValue(CFDictionaryGetValue(window, kCGWindowNumber),
+                             kCFNumberSInt64Type,
+                             &windowID);
+            break;
+        }
+    }
+
+    CFRelease(windowList);
+
+    return windowID;
+}
 
 
 CGRect CGWindowGetBounds(CGWindowID windowID) {

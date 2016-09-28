@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2015-2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -20,4 +20,5 @@
 @import ApplicationServices;
 
 
+CGWindowID CGWindowAtPosition(CGPoint position);
 CGRect CGWindowGetBounds(CGWindowID windowID);
