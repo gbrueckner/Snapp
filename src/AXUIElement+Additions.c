@@ -20,12 +20,16 @@
 #import "AXUIElement+Additions.h"
 
 
+#ifdef DEBUG
+
 extern AXError _AXUIElementGetWindow(AXUIElementRef, CGWindowID* out);
 
 
 AXError AXUIElementGetWindow(AXUIElementRef window, CGWindowID *windowID) {
     return _AXUIElementGetWindow(window, windowID);
 }
+
+#endif
 
 
 #pragma mark - Getters

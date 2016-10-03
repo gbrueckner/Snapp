@@ -19,8 +19,12 @@
 
 @import AppKit;
 
+#ifdef DEBUG
 
+// This function uses a private API, so only use it in debug builds.
 AXError AXUIElementGetWindow(AXUIElementRef window, CGWindowID *windowID);
+
+#endif
 
 #pragma mark - Getters
 
