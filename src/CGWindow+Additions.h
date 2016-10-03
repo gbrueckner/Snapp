@@ -21,4 +21,5 @@
 
 
 CGWindowID CGWindowAtPosition(CGPoint position);
+CGWindowID CGWindowWithInfo(AXUIElementRef window, CGPoint location);
 CGRect CGWindowGetBounds(CGWindowID windowID);

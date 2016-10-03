@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2015-2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -21,6 +21,7 @@
 #import "AXUIElement+Additions.h"
 #import "CGWindow+Additions.h"
 #import "NSScreen+Additions.h"
+#import "SNLog.h"
 
 
 @interface SNWindow ()
@@ -33,18 +34,52 @@
 @implementation SNWindow
 
 
-- (instancetype)initWithWindowElement:(AXUIElementRef)window {
+- (instancetype)initWithID:(CGWindowID)windowID element:(AXUIElementRef)windowElement {
 
     if ((self = [super init])) {
-
-        if (AXUIElementGetWindow(window, &_windowID) != kAXErrorSuccess)
-            return nil;
-
-        _windowElement = window;
+        _windowID = windowID;
+        _windowElement = windowElement;
         CFRetain(_windowElement);
+
+#ifdef DEBUG
+
+        // Check whether the window is consistent using private APIs.
+        CGWindowID correctWindowID;
+        AXUIElementGetWindow(_windowElement, &correctWindowID);
+
+        if (_windowID != correctWindowID)
+            SNLog(@"Created inconsistent window.");
+#endif
     }
 
     return self;
+}
+
+
++ (instancetype)windowWithID:(CGWindowID)windowID element:(AXUIElementRef)element {
+    return [[[self alloc] initWithID:windowID element:element] autorelease];
+}
+
+
++ (instancetype)windowAtLocation:(NSPoint)location {
+
+    CGPoint flippedLocation = NSPointToCGPoint([NSScreen flipPoint:location]);
+
+    AXUIElementRef windowElement;
+    if (AXUIElementCopyWindowAtPosition(flippedLocation, &windowElement) != kAXErrorSuccess) {
+        SNLog(@"AXUIElementCopyWindowAtPosition() failed.");
+        return nil;
+    }
+
+    CGWindowID windowID = CGWindowWithInfo(windowElement, flippedLocation);
+
+    if (windowID == kCGNullWindowID) {
+        SNLog(@"CGWindowWithInfo() failed.");
+        CFRelease(windowElement);
+        return nil;
+    }
+
+    return [[[self alloc] initWithID:windowID element:windowElement] autorelease];
 }
 
 
@@ -66,7 +101,7 @@
 }
 
 
-- (BOOL)isResizable {
+- (BOOL)resizable {
 
     Boolean resizable;
     AXError error = AXUIElementIsAttributeSettable(self.windowElement, kAXSizeAttribute, &resizable);
@@ -75,6 +110,17 @@
         return YES;
     else
         return NO;
+}
+
+
+- (NSString *)description {
+
+    CFStringRef description;
+
+    if (AXUIElementGetTitle(self.windowElement, &description) != kAXErrorSuccess)
+        return nil;
+
+    return (NSString *) description;
 }
 
 

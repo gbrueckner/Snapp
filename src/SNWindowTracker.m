@@ -35,6 +35,7 @@
 @property SNHotZone lastHotZone;
 @property(retain) SNWindow *focusedWindow;
 @property enum {
+              kSNWindowTrackerStateIdle,
               kSNWindowTrackerStateWaitingForDrag,
               kSNWindowTrackerStateWindowIsMoving,
               kSNWindowTrackerStateWindowIsResizing,
@@ -64,17 +65,9 @@ CGEventRef mouseEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     NSPoint flippedPoint = [NSScreen flipPoint:eventPoint];
 
     switch (type) {
-        case kCGEventLeftMouseDown: {
-                AXUIElementRef windowElement;
-                AXError error = AXUIElementCopyWindowAtPosition(eventPoint, &windowElement);
-                if (error == kAXErrorSuccess) {
-                    SNWindow *window = [[SNWindow alloc] initWithWindowElement:windowElement];
-                    [(SNWindowTracker *)refcon focusedWindowDidChange:window];
-                    [window release];
-                }
-                [(SNWindowTracker *)refcon leftMouseDownAtPoint:flippedPoint];
-                break;
-            }
+        case kCGEventLeftMouseDown:
+            [(SNWindowTracker *)refcon leftMouseDownAtPoint:flippedPoint];
+            break;
         case kCGEventLeftMouseDragged:
             [(SNWindowTracker *)refcon leftMouseDraggedToPoint:flippedPoint];
             break;
@@ -193,7 +186,7 @@ CGEventRef mouseEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 
 - (void)leftMouseDownAtPoint:(NSPoint)point{
-    self.initialFrame = [self.focusedWindow frame];
+    [self focusedWindowDidChange:[SNWindow windowAtLocation:point]];
     self.state = kSNWindowTrackerStateWaitingForDrag;
 }
 
@@ -220,6 +213,7 @@ CGEventRef mouseEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 - (void)leftMouseUpAtPoint:(NSPoint)point {
     if (self.state == kSNWindowTrackerStateWindowIsMoving)
         [self windowWasDroppedAtPoint:point];
+    self.state = kSNWindowTrackerStateIdle;
 }
 
 
@@ -227,8 +221,15 @@ CGEventRef mouseEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 
 - (void)focusedWindowDidChange:(SNWindow *)window {
+
+    if (!window)
+        return;
+
     self.focusedWindow = window;
     self.initialFrame = self.focusedWindow.frame;
+
+    if (self.state != kSNWindowTrackerStateIdle)
+        self.state = kSNWindowTrackerStateWaitingForDrag;
 }
 
 

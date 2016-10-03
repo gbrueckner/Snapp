@@ -17,19 +17,8 @@
  */
 
 
-#import "SNTextView.h"
-
-
-@implementation SNTextView
-
-
-// This method keeps the width equal and changes the height to the minimum value
-// required to display the entire text.
-- (NSSize)intrinsicContentSize {
-    self.textContainer.size = self.maxSize;
-    [self.layoutManager ensureLayoutForTextContainer:self.textContainer];
-    return [self.layoutManager usedRectForTextContainer:self.textContainer].size;
-}
-
-
-@end
+#ifdef DEBUG
+#   define SNLog(fmt, ...) NSLog((@"%s:%d " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__)
+#else
+#   define SNLog(...)
+#endif

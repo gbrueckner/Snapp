@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2015-2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -113,6 +113,13 @@ end:
     if (role != NULL)
         CFRelease(role);
     return error;
+}
+
+
+AXError AXUIElementGetTitle(AXUIElementRef element, CFStringRef *title) {
+    return AXUIElementCopyAttributeValue(element,
+                                         kAXTitleAttribute,
+                                         (CFTypeRef *) title);
 }
 
 

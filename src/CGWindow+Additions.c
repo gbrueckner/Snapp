@@ -18,6 +18,64 @@
 
 
 #include "CGWindow+Additions.h"
+#import "AXUIElement+Additions.h"
+
+
+CGWindowID CGWindowWithInfo(AXUIElementRef window, CGPoint location) {
+
+    AXError error;
+
+    pid_t pid;
+    error = AXUIElementGetPid(window, &pid);
+
+    CFStringRef title;
+    error = AXUIElementGetTitle(window, &title);
+
+    CGRect frame;
+    error = AXUIElementGetFrame(window, &frame);
+
+    CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements,
+                                                       kCGNullWindowID);
+    if (windowList == NULL)
+        return kCGNullWindowID;
+
+    CGWindowID windowID = kCGNullWindowID;
+
+    for (CFIndex i = 0; i < CFArrayGetCount(windowList); i++) {
+
+        CFDictionaryRef window = CFArrayGetValueAtIndex(windowList, i);
+
+        int windowPID;
+        CFNumberGetValue(CFDictionaryGetValue(window, kCGWindowOwnerPID),
+                         kCFNumberIntType,
+                         &windowPID);
+
+        if (windowPID != pid)
+            continue;
+
+        CGRect windowBounds;
+        CGRectMakeWithDictionaryRepresentation(CFDictionaryGetValue(window, kCGWindowBounds),
+                                               &windowBounds);
+
+        if (!CGSizeEqualToSize(frame.size, windowBounds.size))
+            continue;
+
+        if (!CGRectContainsPoint(windowBounds, location))
+            continue;
+
+        CFStringRef windowName = CFDictionaryGetValue(window, kCGWindowName);
+        if (CFStringCompare(windowName, title, 0) == kCFCompareEqualTo) {
+            CFNumberGetValue(CFDictionaryGetValue(window, kCGWindowNumber),
+                             kCGWindowIDCFNumberType,
+                             &windowID);
+            break;
+        }
+    }
+
+    CFRelease(windowList);
+
+    return windowID;
+}
 
 
 CGWindowID CGWindowAtPosition(CGPoint position) {
@@ -33,9 +91,9 @@ CGWindowID CGWindowAtPosition(CGPoint position) {
 
         CFDictionaryRef window = CFArrayGetValueAtIndex(windowList, i);
 
-        int64_t layer;
+        int layer;
         CFNumberGetValue(CFDictionaryGetValue(window, kCGWindowLayer),
-                         kCFNumberSInt64Type,
+                         kCFNumberIntType,
                          &layer);
         if (layer != 0)
             continue;
@@ -46,7 +104,7 @@ CGWindowID CGWindowAtPosition(CGPoint position) {
 
         if (CGRectContainsPoint(windowBounds, position)) {
             CFNumberGetValue(CFDictionaryGetValue(window, kCGWindowNumber),
-                             kCFNumberSInt64Type,
+                             kCGWindowIDCFNumberType,
                              &windowID);
             break;
         }

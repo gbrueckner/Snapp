@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2015-2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -19,6 +19,8 @@
 
 #import "SNFocusedWindowTracker.h"
 #import "AXError+Additions.h"
+#import "CGWindow+Additions.h"
+#import "SNLog.h"
 
 
 #pragma mark - SNFocusedWindowTracker private interface
@@ -107,16 +109,14 @@ void focusedWindowDidChange(AXObserverRef observer, AXUIElementRef element, CFSt
     }
 
     pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
-    if (pid == -1) {
-        NSLog(@"Could not determine the PID for this application.");
+    if (pid == -1)
         return;
-    }
 
     self.focusedApp = AXUIElementCreateApplication(pid);
 
     error = AXObserverCreate(pid, focusedWindowDidChange, &_windowObserver);
     if (error != kAXErrorSuccess) {
-        NSLog(@"AXObserverCreate failed (%@).", AXErrorToNSString(error));
+        SNLog(@"AXObserverCreate failed (%@).", AXErrorToNSString(error));
         return;
     }
 
@@ -125,51 +125,63 @@ void focusedWindowDidChange(AXObserverRef observer, AXUIElementRef element, CFSt
     // AXObserverAddNotification fails. However, it is necessary to call this
     // function as soon as possible, because otherwise a drag might not be
     // correctly recognized.
-    // This is the purpose of this loop. To prevent Snapp from getting stuck in
-    // the loop, the magic value of 10000 attempts is used.
-    int attempts = 0;
-    do {
-        error = AXObserverAddNotification(self.windowObserver,
-                                          self.focusedApp,
-                                          kAXFocusedWindowChangedNotification,
-                                          self);
-        attempts++;
-    } while (error != kAXErrorSuccess && attempts < 10000);
-    if (error != kAXErrorSuccess) {
-        NSLog(@"AXObserverAddNotification failed (%@).", AXErrorToNSString(error));
-        return;
-    }
+    // This is the purpose of this block. To prevent Snapp from getting stuck in
+    // the block, the magic value of 100 attempts is used.
 
-    CFRunLoopAddSource(CFRunLoopGetCurrent(),
-                       AXObserverGetRunLoopSource(self.windowObserver),
-                       kCFRunLoopDefaultMode);
+    __block int attempts = 100;
 
-    // The focusedApp has changed, so update focusedWindow accordingly.
-    [self focusedWindowDidChange:NULL];
+    void (^__block block)() = [^{
+
+        AXError error = AXObserverAddNotification(self.windowObserver,
+                                                  self.focusedApp,
+                                                  kAXFocusedWindowChangedNotification,
+                                                  self);
+
+        if (error == kAXErrorSuccess) {
+            CFRunLoopAddSource(CFRunLoopGetCurrent(),
+                               AXObserverGetRunLoopSource(self.windowObserver),
+                               kCFRunLoopDefaultMode);
+
+            AXUIElementRef window;
+            if (AXUIElementCopyAttributeValue(self.focusedApp,
+                                              kAXFocusedWindowAttribute,
+                                              (CFTypeRef *) &window) == kAXErrorSuccess) {
+                // The focusedApp has changed, so update focusedWindow accordingly.
+                [self focusedWindowDidChange:window];
+                CFRelease(window);
+            }
+
+            [block release];
+        }
+        else if (attempts-- > 0)
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 50),
+                           dispatch_get_main_queue(),
+                           block);
+        else
+            SNLog(@"AXObserverAddNotification failed (%@), giving up.", AXErrorToNSString(error));
+
+    } copy];
+
+    block();
 }
 
 
 - (void)focusedWindowDidChange:(AXUIElementRef)window {
 
-    if (window == NULL) {
-        if (AXUIElementCopyAttributeValue(self.focusedApp,
-                                          kAXFocusedWindowAttribute,
-                                          (CFTypeRef *) &window) != kAXErrorSuccess) {
-            [self performSelector:@selector(focusedWindowDidChange:)
-                       withObject:nil
-                       afterDelay:0.1];
-            return;
-        }
-    }
+    CGEventRef event = CGEventCreate(NULL);
+    CGPoint location = CGEventGetLocation(event);
+    CFRelease(event);
+
+    CGWindowID windowID = CGWindowWithInfo(window, location);
+
+    SNWindow *newWindow = nil;
+    if (windowID != kCGNullWindowID)
+        newWindow = [SNWindow windowWithID:windowID
+                                   element:window];
     else
-        CFRetain(window);
+        SNLog(@"CGWindowWithInfo() failed.");
 
-    SNWindow *focusedWindow = [[SNWindow alloc] initWithWindowElement:window];
-
-    [self.delegate focusedWindowDidChange:focusedWindow];
-
-    [focusedWindow release];
-    CFRelease(window);
+    [self.delegate focusedWindowDidChange:newWindow];
 }
 
 

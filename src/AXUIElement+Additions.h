@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2015-2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -28,6 +28,7 @@ AXError AXUIElementGetSize(AXUIElementRef element, CGSize *size);
 AXError AXUIElementGetOrigin(AXUIElementRef element, CGPoint *origin);
 AXError AXUIElementGetFrame(AXUIElementRef element, CGRect *frame);
 AXError AXUIElementCopyWindowAtPosition(CGPoint position, AXUIElementRef *window);
+AXError AXUIElementGetTitle(AXUIElementRef element, CFStringRef *title);
 
 #pragma mark - Setters
 

@@ -1,4 +1,4 @@
-/* Copyright 2015 gbrueckner.
+/* Copyright 2015-2016 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -23,11 +23,10 @@
 @interface SNWindow : NSObject
 
 @property(readonly) CGWindowID windowID;
+@property           NSRect     frame;
+@property(readonly) BOOL       resizable;
 
-- (instancetype)initWithWindowElement:(AXUIElementRef)window;
-- (void)setFrame:(NSRect)frame;
-- (NSRect)frame;
-- (BOOL)isResizable;
-
++ (instancetype)windowAtLocation:(NSPoint)location;
++ (instancetype)windowWithID:(CGWindowID)windowID element:(AXUIElementRef)element;
 
 @end

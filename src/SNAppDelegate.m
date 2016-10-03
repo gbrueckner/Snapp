@@ -216,7 +216,7 @@
 
 
 - (NSRect)frameForWindow:(SNWindow *)window inHotZone:(SNHotZone)hotZone ofScreen:(NSScreen *) screen {
-    if (window.isResizable)
+    if (window.resizable)
         return [self resizedFrameForHotZone:hotZone
                                    ofScreen:screen];
     else
@@ -300,7 +300,7 @@
     // If the window has been dragged into fullscreen mode, store the previous
     // size, so that this size can be restored later when dragging the window
     // down.
-    if (hotZone == kSNHotZoneUp && [window isResizable])
+    if (hotZone == kSNHotZoneUp && window.resizable)
         [self.storedWindowSizes setObject:[NSValue valueWithSize:window.frame.size]
                                    forKey:[NSNumber numberWithUnsignedInt:window.windowID]];
 
