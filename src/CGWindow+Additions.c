@@ -27,12 +27,16 @@ CGWindowID CGWindowWithInfo(AXUIElementRef window, CGPoint location) {
 
     pid_t pid;
     error = AXUIElementGetPid(window, &pid);
+    if (error != kAXErrorSuccess)
+        return kCGNullWindowID;
 
-    CFStringRef title;
+    CFStringRef title = NULL;
     error = AXUIElementGetTitle(window, &title);
 
     CGRect frame;
     error = AXUIElementGetFrame(window, &frame);
+    if (error != kAXErrorSuccess)
+        return kCGNullWindowID;
 
     CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements,
                                                        kCGNullWindowID);
@@ -64,7 +68,7 @@ CGWindowID CGWindowWithInfo(AXUIElementRef window, CGPoint location) {
             continue;
 
         CFStringRef windowName = CFDictionaryGetValue(window, kCGWindowName);
-        if (CFStringCompare(windowName, title, 0) == kCFCompareEqualTo) {
+        if (windowName == NULL || title == NULL || CFStringCompare(windowName, title, 0) == kCFCompareEqualTo) {
             CFNumberGetValue(CFDictionaryGetValue(window, kCGWindowNumber),
                              kCGWindowIDCFNumberType,
                              &windowID);
