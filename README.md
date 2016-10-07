@@ -8,7 +8,7 @@ Snapp enables mouse-based side-by-side window management for OS X.
 
 Drag a window up to the menubar to maximize it, or drag a window to the side to resize it to the corresponding screen half.
 
-![Snapp in action](https://i.imgur.com/STFK4q3.gif)
+![Snapp in action](https://i.imgur.com/cp3M7Sm.gif)
 
 ### Compatibility
 
