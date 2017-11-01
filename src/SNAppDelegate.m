@@ -86,13 +86,40 @@
         layer.lineWidth = 6;
         layer.strokeColor = [NSColor blackColor].CGColor;
 
-        CAShapeLayer *yellowLayer = [CAShapeLayer layer];
-        yellowLayer.fillColor = nil;
-        yellowLayer.lineDashPattern = @[@12, @8];
-        yellowLayer.lineWidth = 3;
-        yellowLayer.strokeColor = [NSColor yellowColor].CGColor;
+        CAShapeLayer *highlightLayer = [CAShapeLayer layer];
+        highlightLayer.fillColor = nil;
+        highlightLayer.lineDashPattern = @[@12, @8];
+        highlightLayer.lineWidth = 3;
 
-        [layer addSublayer:yellowLayer];
+        // Set the stroke color depending on the system control tint.
+        void (^setStrokeColor)(NSNotification *note) = ^void(NSNotification *note) {
+
+            NSColor *strokeColor = nil;
+
+            switch ([NSColor currentControlTint]) {
+                case NSBlueControlTint:
+                    strokeColor = [NSColor yellowColor];
+                    break;
+                case NSGraphiteControlTint:
+                    strokeColor = [NSColor colorWithWhite:0.8
+                                                    alpha:1.0];
+                    break;
+                default:
+                    break;
+            }
+
+            highlightLayer.strokeColor = strokeColor.CGColor;
+        };
+
+        [[NSNotificationCenter defaultCenter] addObserverForName:NSControlTintDidChangeNotification
+                                                          object:nil
+                                                           queue:nil
+                                                      usingBlock:setStrokeColor];
+
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSControlTintDidChangeNotification
+                                                            object:nil];
+
+        [layer addSublayer:highlightLayer];
 
         // Don't use dot syntax here, see #4.
         [window.contentView setLayer:layer];
@@ -260,10 +287,10 @@
 
         // Don't use dot syntax here, see #4.
         CAShapeLayer *layer = (CAShapeLayer *) [self.borderWindowController.window.contentView layer];
-        CAShapeLayer *yellowLayer = (CAShapeLayer *) [layer.sublayers objectAtIndex:0];
+        CAShapeLayer *highlightLayer = (CAShapeLayer *) [layer.sublayers objectAtIndex:0];
 
         layer.path = path;
-        yellowLayer.path = path;
+        highlightLayer.path = path;
 
         CGPathRelease(path);
 
@@ -284,7 +311,7 @@
         animation.repeatCount = HUGE_VALF;
         animation.duration = 0.4;
 
-        [yellowLayer addAnimation:animation forKey:nil];
+        [highlightLayer addAnimation:animation forKey:nil];
 
         [self.borderWindowController.window makeKeyAndOrderFront:nil];
     }
