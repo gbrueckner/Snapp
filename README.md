@@ -12,7 +12,7 @@ Drag a window up to the menubar to maximize it, or drag a window to the side to 
 
 ### Compatibility
 
-Snapp is developed on macOS Sierra and is not supported for older versions of macOS.
+Snapp is developed on macOS High Sierra and is not supported for older versions of macOS.
 
 ## Installation
 
@@ -26,5 +26,5 @@ To open Snapp at login, click the checkbox in Snapp's preferences window.
 
 ## License
 
-Copyright 2015-2016 gbrueckner.
+Copyright 2015-2017 gbrueckner.
 Snapp is released under the terms of the GNU General Public License version 3.

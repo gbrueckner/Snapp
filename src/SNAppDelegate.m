@@ -1,4 +1,4 @@
-/* Copyright 2015-2016 gbrueckner.
+/* Copyright 2015-2017 gbrueckner.
  *
  * This file is part of Snapp.
  *
