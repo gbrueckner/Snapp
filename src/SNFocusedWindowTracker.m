@@ -1,4 +1,4 @@
-/* Copyright 2015-2016 gbrueckner.
+/* Copyright 2015-2017 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -94,7 +94,7 @@ void focusedWindowDidChange(AXObserverRef observer, AXUIElementRef element, CFSt
 
     AXError error;
 
-    if (self.windowObserver != NULL || self.focusedApp != NULL) {
+    if (self.windowObserver != NULL && self.focusedApp != NULL) {
 
         CFRunLoopRemoveSource(CFRunLoopGetCurrent(),
                               AXObserverGetRunLoopSource(self.windowObserver),
