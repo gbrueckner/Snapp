@@ -1,4 +1,4 @@
-/* Copyright 2016 gbrueckner.
+/* Copyright 2016-2018 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -51,14 +51,14 @@
 
     self.yesButton = [[NSButton alloc] initWithFrame:NSZeroRect];
     self.yesButton.title = @"Yes";
-    self.yesButton.bezelStyle = NSRoundedBezelStyle;
+    self.yesButton.bezelStyle = NSBezelStyleRounded;
     self.yesButton.target = self;
     self.yesButton.action = @selector(buttonClicked:);
     self.yesButton.keyEquivalent = @"\r";
 
     NSButton *noButton = [[NSButton alloc] initWithFrame:NSZeroRect];
     noButton.title = @"No";
-    noButton.bezelStyle = NSRoundedBezelStyle;
+    noButton.bezelStyle = NSBezelStyleRounded;
     noButton.target = self;
     noButton.action = @selector(buttonClicked:);
     noButton.keyEquivalent = @"\E";

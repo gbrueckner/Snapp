@@ -1,4 +1,4 @@
-/* Copyright 2015-2016 gbrueckner.
+/* Copyright 2015-2018 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -59,7 +59,7 @@
     // Create the login checkbox.
     self.loginCheckbox = [[NSButton alloc] initWithFrame:NSZeroRect];
     self.loginCheckbox.title = @"Open Snapp automatically when you log in";
-    self.loginCheckbox.buttonType = NSSwitchButton;
+    self.loginCheckbox.buttonType = NSButtonTypeSwitch;
     self.loginCheckbox.target = self;
     self.loginCheckbox.action = @selector(loginCheckboxClicked:);
     [self.view addSubview:self.loginCheckbox];
@@ -68,7 +68,7 @@
     // Create the sound checkbox.
     self.playSoundCheckbox = [[NSButton alloc] initWithFrame:NSZeroRect];
     self.playSoundCheckbox.title = @"Play a sound when snapping windows";
-    self.playSoundCheckbox.buttonType = NSSwitchButton;
+    self.playSoundCheckbox.buttonType = NSButtonTypeSwitch;
     self.playSoundCheckbox.target = self;
     self.playSoundCheckbox.action = @selector(playSoundCheckboxClicked:);
     [self.view addSubview:self.playSoundCheckbox];
@@ -77,7 +77,7 @@
     // Create the update checkbox.
     self.updateCheckbox = [[NSButton alloc] initWithFrame:NSZeroRect];
     self.updateCheckbox.title = @"Check for updates automatically";
-    self.updateCheckbox.buttonType = NSSwitchButton;
+    self.updateCheckbox.buttonType = NSButtonTypeSwitch;
     self.updateCheckbox.target = self;
     self.updateCheckbox.action = @selector(updateCheckboxClicked:);
 #ifndef APP_STORE
@@ -88,7 +88,7 @@
     // Create the quit button.
     NSButton *quitButton = [[NSButton alloc] initWithFrame:NSZeroRect];
     quitButton.title = @"Quit Snapp";
-    quitButton.bezelStyle = NSRoundedBezelStyle;
+    quitButton.bezelStyle = NSBezelStyleRounded;
     quitButton.target = NSApp;
     quitButton.action = @selector(terminate:);
     quitButton.keyEquivalent = @"q";
@@ -202,17 +202,17 @@
 
 
 - (void)viewWillAppear {
-    self.loginCheckbox.state     = [[NSUserDefaults standardUserDefaults] boolForKey:@"openAtLogin"]     ? NSOnState : NSOffState;
-    self.playSoundCheckbox.state = [[NSUserDefaults standardUserDefaults] boolForKey:@"playSnapSound"]   ? NSOnState : NSOffState;
-    self.updateCheckbox.state    = [[NSUserDefaults standardUserDefaults] boolForKey:@"checkForUpdates"] ? NSOnState : NSOffState;
+    self.loginCheckbox.state     = [[NSUserDefaults standardUserDefaults] boolForKey:@"openAtLogin"]     ? NSControlStateValueOn : NSControlStateValueOff;
+    self.playSoundCheckbox.state = [[NSUserDefaults standardUserDefaults] boolForKey:@"playSnapSound"]   ? NSControlStateValueOn : NSControlStateValueOff;
+    self.updateCheckbox.state    = [[NSUserDefaults standardUserDefaults] boolForKey:@"checkForUpdates"] ? NSControlStateValueOn : NSControlStateValueOff;
 }
 
 
 - (void)loginCheckboxClicked:(NSButton *)loginCheckbox {
 
     if (SMLoginItemSetEnabled(CFSTR("com.brueckner.SnappHelper"),
-                               loginCheckbox.state == NSOnState ? TRUE : FALSE)) {
-         [[NSUserDefaults standardUserDefaults] setBool:(loginCheckbox.state == NSOnState)
+                               loginCheckbox.state == NSControlStateValueOn ? TRUE : FALSE)) {
+         [[NSUserDefaults standardUserDefaults] setBool:(loginCheckbox.state == NSControlStateValueOn)
                                                  forKey:@"openAtLogin"];
     }
     else
@@ -221,13 +221,13 @@
 
 
 - (void)playSoundCheckboxClicked:(NSButton *)playSoundCheckbox {
-     [[NSUserDefaults standardUserDefaults] setBool:(playSoundCheckbox.state == NSOnState)
+     [[NSUserDefaults standardUserDefaults] setBool:(playSoundCheckbox.state == NSControlStateValueOn)
                                              forKey:@"playSnapSound"];
 }
 
 
 - (void)updateCheckboxClicked:(NSButton *)updateCheckbox {
-     [[NSUserDefaults standardUserDefaults] setBool:(updateCheckbox.state == NSOnState)
+     [[NSUserDefaults standardUserDefaults] setBool:(updateCheckbox.state == NSControlStateValueOn)
                                              forKey:@"checkForUpdates"];
 }
 

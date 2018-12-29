@@ -1,4 +1,4 @@
-/* Copyright 2016 gbrueckner.
+/* Copyright 2016-2018 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -48,7 +48,7 @@
 
     NSButton *openButton = [[NSButton alloc] initWithFrame:NSZeroRect];
     openButton.title = @"Open System Preferences";
-    openButton.bezelStyle = NSRoundedBezelStyle;
+    openButton.bezelStyle = NSBezelStyleRounded;
     openButton.target = self;
     openButton.action = @selector(openButtonClicked:);
     openButton.keyEquivalent = @"\r";

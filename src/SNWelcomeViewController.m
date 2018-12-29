@@ -1,4 +1,4 @@
-/* Copyright 2016 gbrueckner.
+/* Copyright 2016-2018 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -52,7 +52,7 @@
 
     NSButton *okButton = [[NSButton alloc] initWithFrame:NSZeroRect];
     okButton.title = @"OK";
-    okButton.bezelStyle = NSRoundedBezelStyle;
+    okButton.bezelStyle = NSBezelStyleRounded;
     okButton.target = self;
     okButton.action = @selector(okButtonClicked:);
     okButton.keyEquivalent = @"\r";
