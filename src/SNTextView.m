@@ -1,4 +1,4 @@
-/* Copyright 2016 gbrueckner.
+/* Copyright 2016-2018 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -26,7 +26,12 @@
 // This method keeps the width equal and changes the height to the minimum value
 // required to display the entire text.
 - (NSSize)intrinsicContentSize {
-    self.textContainer.size = self.maxSize;
+
+    // This method seems to work correctly for non-retina displays, but not for
+    // retina displays. The following line is a dirty ad-hoc fix for retina
+    // displays and should be replaced by something better.
+    self.textContainer.size = NSMakeSize(258, CGFLOAT_MAX);
+
     [self.layoutManager ensureLayoutForTextContainer:self.textContainer];
     return [self.layoutManager usedRectForTextContainer:self.textContainer].size;
 }
