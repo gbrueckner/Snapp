@@ -1,4 +1,4 @@
-/* Copyright 2015-2016 gbrueckner.
+/* Copyright 2015-2018 gbrueckner.
  *
  * This file is part of Snapp.
  *
@@ -21,10 +21,19 @@
 #import "AXUIElement+Additions.h"
 
 
+#ifndef APP_STORE
+extern AXError _AXUIElementGetWindow(AXUIElementRef, CGWindowID*);
+#endif
+
+
 CGWindowID CGWindowWithInfo(AXUIElementRef window, CGPoint location) {
 
     AXError error;
+    CGWindowID windowID = kCGNullWindowID;
 
+#ifndef APP_STORE
+    error = _AXUIElementGetWindow(window, &windowID);
+#else
     pid_t pid;
     error = AXUIElementGetPid(window, &pid);
     if (error != kAXErrorSuccess)
@@ -42,8 +51,6 @@ CGWindowID CGWindowWithInfo(AXUIElementRef window, CGPoint location) {
                                                        kCGNullWindowID);
     if (windowList == NULL)
         return kCGNullWindowID;
-
-    CGWindowID windowID = kCGNullWindowID;
 
     for (CFIndex i = 0; i < CFArrayGetCount(windowList); i++) {
 
@@ -77,6 +84,7 @@ CGWindowID CGWindowWithInfo(AXUIElementRef window, CGPoint location) {
     }
 
     CFRelease(windowList);
+#endif
 
     return windowID;
 }
