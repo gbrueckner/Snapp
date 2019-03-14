@@ -1,18 +1,14 @@
-# Snapp
+# Snapp &nbsp;&nbsp;&nbsp; [![Build Status](https://travis-ci.org/gbrueckner/Snapp.svg?branch=master)](https://travis-ci.org/gbrueckner/Snapp)
 
-![Snapp icon](https://i.imgur.com/u9GJmLD.png)
+![Snapp Icon](https://i.imgur.com/u9GJmLD.png)
 
 ## Overview
 
-Snapp enables mouse-based side-by-side window management for OS X.
+Snapp enables drag-and-drop window management for macOS.
 
 Drag a window up to the menubar to maximize it, or drag a window to the side to resize it to the corresponding screen half.
 
 ![Snapp in action](https://i.imgur.com/cp3M7Sm.gif)
-
-### Compatibility
-
-Snapp is developed on macOS High Sierra and is not supported for older versions of macOS.
 
 ## Installation
 
@@ -26,5 +22,5 @@ To open Snapp at login, click the checkbox in Snapp's preferences window.
 
 ## License
 
-Copyright 2015-2017 gbrueckner.
+Copyright 2015-2019 gbrueckner.
 Snapp is released under the terms of the GNU General Public License version 3.
